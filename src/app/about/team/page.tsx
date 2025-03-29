@@ -5,7 +5,7 @@ import Footer from "@/Components/Footer";
 import { motion } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
-import { Vortex } from "@/Components/ui/vortex";
+import { BackgroundBeamsWithCollision } from "@/Components/ui/background-beams-with-collision";
 import { GlowingEffect } from "@/Components/ui/glowing-effect";
 import raviduImage from "../../../images/ravidu.jpeg";
 import isuruImage from "../../../images/isuru.jpeg";
@@ -35,25 +35,16 @@ export default function TeamPage() {
       }
     }
   ];
-  
+
   return (
     <div className="min-h-screen bg-black text-white">
       <NavbarDemo />
-      
-      {/* Hero Section with Vortex effect - Fixed positioning and z-index */}
+
       <div className="relative h-[50vh] w-full mt-36">
-        <Vortex
-          backgroundColor="rgba(0, 0, 0, 0.9)"
-          rangeY={400}
-          particleCount={500}
-          baseHue={240}
-          baseSpeed={0.2}
-          rangeSpeed={1.5}
-          containerClassName="absolute inset-0 z-0"
-        >
+        <BackgroundBeamsWithCollision className="absolute inset-0">
           <div className="container mx-auto px-4 h-full flex items-center justify-center relative z-10">
-            <motion.div 
-              className="text-center max-w-3xl mx-auto p-8 rounded-lg backdrop-blur-md bg-black/40 border border-purple-800/30"
+            <motion.div
+              className="text-center max-w-3xl mx-auto p-8 rounded-lg"
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6 }}
@@ -64,13 +55,12 @@ export default function TeamPage() {
               </p>
             </motion.div>
           </div>
-        </Vortex>
+        </BackgroundBeamsWithCollision>
       </div>
-      
-      {/* Expanded Team Section - Added proper spacing and z-index */}
+
       <section className="py-24 bg-gradient-to-b from-black to-gray-900 relative z-10 mt-10">
         <div className="container mx-auto px-4">
-          <motion.p 
+          <motion.p
             className="text-xl text-gray-300 text-center max-w-3xl mx-auto mb-20"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -78,10 +68,10 @@ export default function TeamPage() {
           >
             Our team combines expertise in education, technology, and design to create a platform that makes learning accessible and engaging for everyone. We're united by a shared vision of transforming education through innovative solutions.
           </motion.p>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-12 max-w-4xl mx-auto">
             {teamMembers.map((member, index) => (
-              <motion.div 
+              <motion.div
                 key={member.name}
                 className="relative rounded-xl"
                 initial={{ opacity: 0, y: 30 }}
@@ -100,8 +90,8 @@ export default function TeamPage() {
                   />
                   <div className="p-8 flex flex-col items-center">
                     <div className="w-48 h-48 relative rounded-full overflow-hidden mb-6 border-2 border-blue-500/30">
-                      <Image 
-                        src={member.image} 
+                      <Image
+                        src={member.image}
                         alt={member.name}
                         fill
                         className="object-cover"
@@ -111,8 +101,7 @@ export default function TeamPage() {
                       <h3 className="text-2xl font-bold text-white mb-2">{member.name}</h3>
                       <p className="text-blue-400 mb-4 text-lg">{member.role}</p>
                       <p className="text-gray-300 mb-6">{member.bio}</p>
-                      
-                      {/* Extended bio content */}
+
                       <div className="bg-gray-800/50 p-4 rounded-lg mb-6">
                         <h4 className="text-white font-medium mb-2">Expertise:</h4>
                         <div className="flex flex-wrap gap-2 mb-4 justify-center">
@@ -135,7 +124,7 @@ export default function TeamPage() {
                           {index === 0 ? "BSc in Software Engineering, NIBM" : "BSc in Software Engineering, NIBM"}
                         </p>
                       </div>
-                      
+
                       <div className="flex space-x-4 justify-center">
                         <a href={member.socialLinks.github} className="text-gray-400 hover:text-white transition-colors">
                           <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
@@ -159,8 +148,7 @@ export default function TeamPage() {
               </motion.div>
             ))}
           </div>
-          
-          {/* Join our team section */}
+
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
@@ -171,7 +159,7 @@ export default function TeamPage() {
             <p className="text-gray-300 max-w-2xl mx-auto mb-8">
               We're always looking for passionate individuals who share our vision of making education accessible to everyone. If you're interested in joining our team, get in touch!
             </p>
-            <Link 
+            <Link
               href="/contact"
               className="inline-flex items-center gap-2 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white px-8 py-3 rounded-lg transition-colors shadow-lg shadow-purple-500/20"
             >
@@ -183,7 +171,7 @@ export default function TeamPage() {
           </motion.div>
         </div>
       </section>
-      
+
       <div className="mt-20 relative z-10">
         <Footer />
       </div>

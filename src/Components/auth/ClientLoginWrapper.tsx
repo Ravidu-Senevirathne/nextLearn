@@ -1,13 +1,19 @@
 "use client";
 
-import dynamic from "next/dynamic";
+import { BackgroundGradientAnimation } from "../ui/background-gradient-animation";
+import { Spotlight } from "../ui/Spotlight";
 
-// Import the client component with dynamic to disable SSR
-const LoginFormClient = dynamic(
-  () => import("@/Components/auth/LoginForm"),
-  { ssr: false }
-);
-
-export default function ClientLoginWrapper() {
-  return <LoginFormClient />;
+export default function ClientLoginWrapper({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="relative min-h-screen flex flex-col overflow-hidden">
+      <Spotlight className="hidden md:block" />
+      <div className="flex flex-grow items-center justify-center relative z-10 px-4 md:px-0">
+        {children}
+      </div>
+    </div>
+  );
 }

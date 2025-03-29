@@ -1,132 +1,138 @@
 "use client";
 
-import React, { useState } from "react";
+import { useState } from "react";
+import { signIn } from "next-auth/react";
+import { useRouter } from "next/navigation";
+import { Input } from "@/Components/ui/input";
 import Link from "next/link";
-import { FaGoogle, FaFacebook } from "react-icons/fa";
-import { Spotlight } from "@/Components/ui/Spotlight";
 
 export default function LoginForm() {
-  const [focusedInput, setFocusedInput] = useState<string | null>(null);
+  const router = useRouter();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+    setError("");
+
+    try {
+      const result = await signIn("credentials", {
+        redirect: false,
+        email,
+        password,
+      });
+
+      if (result?.error) {
+        setError("Invalid email or password");
+        setIsLoading(false);
+      } else {
+        router.push("/dashboard");
+        router.refresh();
+      }
+    } catch (error) {
+      setError("An error occurred. Please try again later.");
+      setIsLoading(false);
+    }
+  };
 
   return (
-    <div className="relative flex min-h-screen w-full overflow-hidden bg-black/[0.96] antialiased">
-      <div className="absolute inset-0 pointer-events-none [background-size:40px_40px] [background-image:linear-gradient(to_right,#171717_1px,transparent_1px),linear-gradient(to_bottom,#171717_1px,transparent_1px)]" />
-      
-      <Spotlight className="-top-40 left-0 md:left-60" fill="white" />
-      
-      <div className="relative z-10 mx-auto w-full max-w-7xl px-4 py-20 md:py-32 pointer-events-auto">
-        <div className="mx-auto max-w-md">
-          <div className="text-center mb-8">
-            <h1 className="bg-gradient-to-b from-neutral-50 to-neutral-400 bg-clip-text text-4xl font-bold text-transparent">
-              Welcome Back
-            </h1>
-            <p className="mt-2 text-neutral-400">
-              Log in to your NextLearn account to continue learning
-            </p>
-          </div>
-
-          <div className="relative z-20 bg-black/30 border border-white/10 rounded-xl p-6 backdrop-blur-sm">
-            {/* Login Form */}
-            <form className="space-y-6">              
-              <div className="relative">
-                <label className="block text-neutral-300 mb-1 text-sm">Email Address</label>
-                <div className="relative">
-                  <input
-                    type="email"
-                    className="w-full bg-black/50 border border-neutral-700 rounded-lg py-4 px-5 text-white text-lg focus:outline-none"
-                    placeholder="Enter your email"
-                    onFocus={() => setFocusedInput("email")}
-                    onBlur={() => setFocusedInput(null)}
-                  />
-                  {focusedInput === "email" && (
-                    <div className="pointer-events-none absolute -inset-px rounded-lg border-2 border-indigo-500 blur-sm" />
-                  )}
-                </div>
-              </div>
-              
-              <div className="relative">
-                <label className="block text-neutral-300 mb-1 text-sm">Password</label>
-                <div className="relative">
-                  <input
-                    type="password"
-                    className="w-full bg-black/50 border border-neutral-700 rounded-lg py-4 px-5 text-white text-lg focus:outline-none"
-                    placeholder="Enter your password"
-                    onFocus={() => setFocusedInput("password")}
-                    onBlur={() => setFocusedInput(null)}
-                  />
-                  {focusedInput === "password" && (
-                    <div className="pointer-events-none absolute -inset-px rounded-lg border-2 border-indigo-500 blur-sm" />
-                  )}
-                </div>
-              </div>
-              
-              <div className="flex items-center justify-between">
-                <div className="flex items-center">
-                  <input
-                    id="remember-me"
-                    name="remember-me"
-                    type="checkbox"
-                    className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-neutral-700 rounded"
-                  />
-                  <label htmlFor="remember-me" className="ml-2 block text-sm text-neutral-400">
-                    Remember me
-                  </label>
-                </div>
-                <div>
-                  <Link
-                    href="/auth/forgot-password"
-                    className="text-sm text-indigo-400 hover:text-indigo-300 transition-colors"
-                  >
-                    Forgot password?
-                  </Link>
-                </div>
-              </div>
-              
-              <div className="relative mt-8">
-                <button
-                  type="submit"
-                  className="w-full text-white py-4 rounded-lg font-medium transition-all duration-300 ease-in-out text-lg transform hover:scale-105 bg-indigo-600 hover:bg-indigo-700 cursor-pointer shadow-lg shadow-indigo-500/50"
-                >
-                  Log In
-                </button>
-              </div>
-            </form>
-
-            <div className="my-6 flex items-center">
-              <div className="flex-1 border-t border-neutral-800"></div>
-              <div className="mx-4 text-sm text-neutral-400">Or continue with</div>
-              <div className="flex-1 border-t border-neutral-800"></div>
-            </div>
-
-            {/* Social Login Buttons */}
-            <div className="grid grid-cols-2 gap-4">
-              <button 
-                type="button"
-                className="flex items-center justify-center gap-2 bg-transparent border border-neutral-700 hover:bg-neutral-800/50 hover:border-red-500/30 py-4 rounded-lg text-white transition-all duration-300 transform hover:scale-105"
-              >
-                <FaGoogle className="text-red-500" />
-                <span>Google</span>
-              </button>
-              <button 
-                type="button"
-                className="flex items-center justify-center gap-2 bg-transparent border border-neutral-700 hover:bg-neutral-800/50 hover:border-blue-500/30 py-4 rounded-lg text-white transition-all duration-300 transform hover:scale-105"
-              >
-                <FaFacebook className="text-blue-500" />
-                <span>Facebook</span>
-              </button>
-            </div>
-
-            <p className="mt-6 text-center text-sm text-neutral-400">
-              Don't have an account yet?{" "}
-              <Link 
-                href="/auth/signup" 
-                className="text-indigo-400 hover:text-indigo-300 transition-colors"
-              >
-                Sign up
-              </Link>
-            </p>
-          </div>
+    <div className="w-full max-w-md mx-auto space-y-6 relative z-10">
+      <div className="text-center">
+        <h1 className="text-3xl font-bold mb-2">Welcome back</h1>
+        <p className="text-gray-500 dark:text-gray-400">
+          Enter your credentials to access your account
+        </p>
+      </div>
+      {error && (
+        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative">
+          <span className="block sm:inline">{error}</span>
         </div>
+      )}
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div>
+          <Input
+            id="email"
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+            className="w-full"
+            placeholder="you@example.com"
+            disabled={isLoading}
+          />
+        </div>
+        <div>
+          <Input
+            id="password"
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+            className="w-full"
+            placeholder="••••••••"
+            disabled={isLoading}
+          />
+        </div>
+        <div className="mt-6">
+          <button
+            type="submit"
+            className={`w-full py-3 px-4 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-md transition duration-200 flex items-center justify-center ${isLoading ? "opacity-50 cursor-not-allowed" : ""
+              }`}
+            disabled={isLoading}
+          >
+            {isLoading ? (
+              <div className="flex items-center">
+                <svg
+                  className="animate-spin h-5 w-5 mr-3 text-white"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                  ></circle>
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                  ></path>
+                </svg>
+                Signing in...
+              </div>
+            ) : (
+              "Sign in"
+            )}
+          </button>
+        </div>
+        <div className="mt-6 grid grid-cols-2 gap-3">
+          <button
+            type="button"
+            className="w-full py-2.5 px-4 border border-gray-300 rounded-md shadow-sm bg-white dark:bg-gray-900 text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800"
+            onClick={() => signIn("google", { callbackUrl: "/dashboard" })}
+          >
+            Google
+          </button>
+          <button
+            type="button"
+            className="w-full py-2.5 px-4 border border-gray-300 rounded-md shadow-sm bg-white dark:bg-gray-900 text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800"
+            onClick={() => signIn("github", { callbackUrl: "/dashboard" })}
+          >
+            GitHub
+          </button>
+        </div>
+      </form>
+      <div className="mt-6 text-center">
+        <Link href="/auth/signup" legacyBehavior>
+      <p className="text-white">If You Dont Have An Account <a className="font-medium text-blue-600 hover:text-blue-500">Sign up</a></p>   
+        </Link>
       </div>
     </div>
   );

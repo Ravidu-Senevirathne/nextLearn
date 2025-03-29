@@ -1,56 +1,46 @@
-import React from "react";
+"use client";
+import React, { useEffect, useRef } from "react";
 import { cn } from "@/lib/utils";
 
-type SpotlightProps = {
+interface SpotlightProps {
   className?: string;
-  fill?: string;
-};
+  size?: number;
+}
 
-export const Spotlight = ({ className, fill }: SpotlightProps) => {
+export function Spotlight({
+  className = "",
+  size = 1000,
+}: SpotlightProps) {
+  const spotlightRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      if (!spotlightRef.current) return;
+
+      const { clientX, clientY } = e;
+      spotlightRef.current.style.background = `
+        radial-gradient(
+          circle at ${clientX}px ${clientY}px,
+          rgba(120, 119, 198, 0.15) 0%,
+          rgba(0, 0, 0, 0) 60%
+        )
+      `;
+    };
+
+    window.addEventListener("mousemove", handleMouseMove);
+
+    return () => {
+      window.removeEventListener("mousemove", handleMouseMove);
+    };
+  }, [size]);
+
   return (
-    <svg
+    <div
       className={cn(
-        "animate-spotlight pointer-events-none absolute z-[1]  h-[169%] w-[138%] lg:w-[84%]",
+        "pointer-events-none fixed inset-0 z-0 h-full w-full",
         className
       )}
-      xmlns="http://www.w3.org/2000/svg"
-      viewBox="0 0 3787 2842"
-      fill="none"
-    >
-      <g filter="url(#filter)">
-        <ellipse
-          cx="1924.71"
-          cy="273.501"
-          rx="1924.71"
-          ry="273.501"
-          transform="matrix(-0.822377 -0.568943 -0.568943 0.822377 3631.88 2291.09)"
-          fill={fill || "white"}
-          fillOpacity="0.21"
-        ></ellipse>
-      </g>
-      <defs>
-        <filter
-          id="filter"
-          x="0.860352"
-          y="0.838989"
-          width="3785.16"
-          height="2840.26"
-          filterUnits="userSpaceOnUse"
-          colorInterpolationFilters="sRGB"
-        >
-          <feFlood floodOpacity="0" result="BackgroundImageFix"></feFlood>
-          <feBlend
-            mode="normal"
-            in="SourceGraphic"
-            in2="BackgroundImageFix"
-            result="shape"
-          ></feBlend>
-          <feGaussianBlur
-            stdDeviation="151"
-            result="effect1_foregroundBlur_1065_8"
-          ></feGaussianBlur>
-        </filter>
-      </defs>
-    </svg>
+      ref={spotlightRef}
+    />
   );
-};
+}

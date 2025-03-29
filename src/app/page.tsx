@@ -9,10 +9,10 @@ import Footer from "@/Components/Footer";
 
 export default function Home() {
   return (
-    <main className="bg-black">
+    <main className="bg-gradient-to-b from-gray-900 to-black">
       <NavbarDemo />
       <Hero />
-      
+
       {/* Main content sections in matching order */}
       <div className="relative z-10">
         <FeaturesSection />
@@ -21,8 +21,8 @@ export default function Home() {
         <TestimonialsSection />
         <CallToAction />
       </div>
-      <Footer/>
+      <Footer />
     </main>
-   
+
   );
 }

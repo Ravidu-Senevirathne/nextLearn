@@ -1,12 +1,12 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   // Optimize output - use 'standalone' for smaller deployments in production
-  output: process.env.NODE_ENV === "production" ? "standalone" : undefined,
+  output: 'standalone',
 
   // More aggressive image optimization
   images: {
-    domains: ["images.unsplash.com"],
-    unoptimized: process.env.NODE_ENV !== "production", // Only unoptimize in development
+    domains: ["avatars.githubusercontent.com", "lh3.googleusercontent.com"],
+    unoptimized: process.env.NODE_ENV === 'development', // Only unoptimize in development
     minimumCacheTTL: 60, // Cache optimized images for 60 seconds
     deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048], // Define exact device sizes
     imageSizes: [16, 32, 48, 64, 96, 128, 256], // Define exact image sizes
@@ -15,6 +15,7 @@ const nextConfig = {
   // During development, disable strict image checks
   typescript: {
     ignoreBuildErrors: true,
+    tsconfigPath: "tsconfig.json",
   },
   eslint: {
     ignoreDuringBuilds: true,
@@ -76,7 +77,11 @@ const nextConfig = {
   // Add Turbopack configuration
   experimental: {
     // Optimize package imports
-    optimizePackageImports: ["framer-motion", "@tabler/icons-react"],
+    optimizePackageImports: [
+      "@tabler/icons-react",
+      "lucide-react",
+      "framer-motion",
+    ],
     // Server Actions are enabled by default in Next.js 14.
     // To customize settings (e.g., bodySizeLimit), define serverActions as an object.
     serverActions: {
@@ -87,10 +92,14 @@ const nextConfig = {
     turbo: {
       // Remove the rules configuration that was causing the error
     },
+    // These settings help ensure CSS is properly loaded in production
+    optimizeCss: true,
+    forceSwcTransforms: true,
   },
 
   // Enable React strict mode for better development experience
   reactStrictMode: true,
+  // swcMinify: true,
 };
 
 module.exports = nextConfig;

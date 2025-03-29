@@ -7,6 +7,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Vortex } from "@/Components/ui/vortex";
 import { GlowingEffect } from "@/Components/ui/glowing-effect";
+import { Spotlight } from "@/Components/ui/Spotlight";
 import conceptImage from "../../images/concept.jpg";
 
 export default function AboutPage() {
@@ -15,44 +16,38 @@ export default function AboutPage() {
     animate: { y: 0, opacity: 1 },
     transition: { duration: 0.5 }
   };
-  
+
   return (
     <div className="min-h-screen bg-black text-white">
       <NavbarDemo />
-      
-      {/* Hero Section with enhanced Vortex - Fixed positioning and z-index */}
-      <div className="relative h-[70vh] w-full mt-36">
-        <Vortex
-          backgroundColor="rgba(0, 0, 0, 0.9)"
-          rangeY={500}
-          particleCount={600}
-          baseHue={140}
-          baseSpeed={0.3}
-          rangeSpeed={2}
-          containerClassName="absolute inset-0 z-0"
-        >
-          <div className="container mx-auto px-4 h-full flex items-center justify-center relative z-10">
-            <motion.div 
-              className="text-center max-w-3xl mx-auto p-8 rounded-lg backdrop-blur-md bg-black/40 border border-blue-800/30"
-              initial={{ opacity: 0, y: -20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6 }}
-            >
-              <h1 className="text-5xl md:text-6xl font-bold text-white mb-6 drop-shadow-lg">Our Mission</h1>
-              <p className="text-xl text-white leading-relaxed drop-shadow-md">
-                To create an efficient platform where teachers and students from around the world can connect, share knowledge, and transform education together.
-              </p>
-            </motion.div>
-          </div>
-        </Vortex>
+
+      {/* Hero Section with Spotlight - Fixed positioning and z-index */}
+      <div className="relative h-[70vh] w-full mt-36 overflow-hidden">
+        <div className="absolute inset-0 z-0 bg-black">
+          <Spotlight className="opacity-70"  />
+        </div>
+
+        <div className="container mx-auto px-4 h-full flex items-center justify-center relative z-10">
+          <motion.div
+        className="text-center max-w-3xl mx-auto p-8 rounded-lg backdrop-blur-md bg-black/40 border border-blue-500/30 shadow-[0_0_15px_rgba(59,130,246,0.2)] hover:shadow-[0_0_25px_rgba(59,130,246,0.3)] transition-shadow duration-300"
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6 }}
+          >
+        <h1 className="text-5xl md:text-6xl font-bold text-white mb-6 drop-shadow-lg">Our Mission</h1>
+        <p className="text-xl text-white leading-relaxed drop-shadow-md">
+          To create an efficient platform where teachers and students from around the world can connect, share knowledge, and transform education together.
+        </p>
+          </motion.div>
+        </div>
       </div>
-      
+
       {/* Enhanced Our Story Section with modern design techniques */}
       <section className="py-28 bg-black relative overflow-hidden mt-10">
         {/* Animated background shapes */}
         <div className="absolute w-96 h-96 rounded-full bg-blue-500/5 blur-3xl top-20 -left-48 animate-pulse"></div>
         <div className="absolute w-96 h-96 rounded-full bg-emerald-500/5 blur-3xl bottom-20 -right-48 animate-pulse" style={{ animationDelay: '2s' }}></div>
-        
+
         <div className="container mx-auto px-4 relative z-10">
           <motion.div
             initial={{ opacity: 0 }}
@@ -61,7 +56,7 @@ export default function AboutPage() {
             viewport={{ once: true }}
             className="max-w-4xl mx-auto"
           >
-            <motion.h2 
+            <motion.h2
               initial={{ y: 50, opacity: 0 }}
               whileInView={{ y: 0, opacity: 1 }}
               viewport={{ once: true }}
@@ -73,9 +68,9 @@ export default function AboutPage() {
               </span>
               <div className="absolute -bottom-4 left-1/2 transform -translate-x-1/2 w-24 h-1 bg-gradient-to-r from-blue-400 to-emerald-400"></div>
             </motion.h2>
-            
+
             <div className="perspective-effect">
-              <motion.div 
+              <motion.div
                 initial={{ y: 100, opacity: 0 }}
                 whileInView={{ y: 0, opacity: 1 }}
                 viewport={{ once: true }}
@@ -83,14 +78,14 @@ export default function AboutPage() {
                 className="relative rounded-2xl overflow-hidden transform hover:scale-[1.02] transition-all duration-700 group"
               >
                 <div className="absolute inset-0 bg-gradient-to-r from-blue-500/20 via-purple-500/20 to-emerald-500/20 opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
-                
+
                 {/* Animated gradient border */}
                 <div className="absolute inset-0 rounded-2xl p-[1px] bg-gradient-conic from-blue-500 via-purple-500 to-emerald-500 animate-spin-slow mask-gradient"></div>
-                
+
                 <div className="bg-gray-900/80 backdrop-filter backdrop-blur-xl rounded-2xl p-10 relative z-10 border border-white/10">
                   <div className="grid md:grid-cols-5 gap-6 items-center">
                     {/* Decorative floating element */}
-                    <motion.div 
+                    <motion.div
                       initial={{ rotate: -5 }}
                       whileInView={{ rotate: 0 }}
                       viewport={{ once: true }}
@@ -99,19 +94,19 @@ export default function AboutPage() {
                     >
                       <div className="w-full aspect-square rounded-lg overflow-hidden relative shadow-2xl shadow-blue-500/20">
                         <div className="absolute inset-0 bg-gradient-to-br from-blue-500/30 to-emerald-500/30 z-10 mix-blend-overlay"></div>
-                        <Image 
-                          src={conceptImage} 
-                          alt="Education concept" 
+                        <Image
+                          src={conceptImage}
+                          alt="Education concept"
                           fill
                           className="object-cover"
                         />
                       </div>
                       <div className="absolute -bottom-4 -right-4 w-24 h-24 bg-gradient-to-br from-blue-500/40 to-purple-500/40 rounded-full blur-xl z-0"></div>
                     </motion.div>
-                    
+
                     {/* Story text with reveal animations */}
                     <div className="md:col-span-3 space-y-6">
-                      <motion.p 
+                      <motion.p
                         initial={{ opacity: 0, y: 20 }}
                         whileInView={{ opacity: 1, y: 0 }}
                         viewport={{ once: true }}
@@ -120,8 +115,8 @@ export default function AboutPage() {
                       >
                         NextLearn was born from a simple observation: despite living in a digitally connected world, <span className="text-blue-400 font-medium">education remains fragmented and inaccessible</span> to many. Ravidu and Isurindu, both passionate about technology and education, set out to change this reality.
                       </motion.p>
-                      
-                      <motion.p 
+
+                      <motion.p
                         initial={{ opacity: 0, y: 20 }}
                         whileInView={{ opacity: 1, y: 0 }}
                         viewport={{ once: true }}
@@ -130,8 +125,8 @@ export default function AboutPage() {
                       >
                         Founded in 2025, our platform aims to bridge the gap between traditional learning methods and modern technology. We believe that <span className="text-emerald-400 font-medium">knowledge should be accessible to everyone</span>, regardless of geographical location or economic background.
                       </motion.p>
-                      
-                      <motion.p 
+
+                      <motion.p
                         initial={{ opacity: 0, y: 20 }}
                         whileInView={{ opacity: 1, y: 0 }}
                         viewport={{ once: true }}
@@ -140,7 +135,7 @@ export default function AboutPage() {
                       >
                         Today, NextLearn serves as a comprehensive ecosystem where educators can create engaging courses, and students can access quality education on their terms. Our focus remains on <span className="text-purple-400 font-medium">innovation, accessibility, and building a global community</span> of lifelong learners.
                       </motion.p>
-                      
+
                       <motion.div
                         initial={{ opacity: 0, scale: 0.9 }}
                         whileInView={{ opacity: 1, scale: 1 }}
@@ -148,8 +143,8 @@ export default function AboutPage() {
                         transition={{ duration: 0.6, delay: 0.9 }}
                         className="mt-8 flex space-x-4"
                       >
-                        <Link 
-                          href="/courses/all-courses" 
+                        <Link
+                          href="/courses/all-courses"
                           className="inline-flex items-center gap-2 bg-gradient-to-r from-blue-500 to-purple-500 text-white px-5 py-3 rounded-lg hover:from-blue-600 hover:to-purple-600 transition-all duration-300 shadow-lg shadow-blue-500/25 group"
                         >
                           Discover Our Courses
@@ -157,8 +152,8 @@ export default function AboutPage() {
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
                           </svg>
                         </Link>
-                        <Link 
-                          href="/about/team" 
+                        <Link
+                          href="/about/team"
                           className="inline-flex items-center gap-2 bg-transparent border border-purple-500 text-white px-5 py-3 rounded-lg hover:bg-purple-500/10 transition-all duration-300 group"
                         >
                           Meet Our Team
@@ -175,17 +170,17 @@ export default function AboutPage() {
           </motion.div>
         </div>
       </section>
-      
+
       {/* Our Values Section - Fixed spacing and z-index */}
       <section className="py-20 bg-black relative z-10 mb-40 mt-10">
         <div className="container mx-auto px-4">
-          <motion.h2 
+          <motion.h2
             className="text-4xl font-bold text-center mb-16 bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-emerald-400"
             {...fadeInUp}
           >
             Our Values
           </motion.h2>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
             {[
               {
@@ -219,7 +214,7 @@ export default function AboutPage() {
                 color: "green"
               }
             ].map((value, index) => (
-              <motion.div 
+              <motion.div
                 key={value.title}
                 className="relative rounded-xl"
                 {...fadeInUp}
@@ -247,7 +242,7 @@ export default function AboutPage() {
           </div>
         </div>
       </section>
-      
+
       {/* CTA Section with enhanced Vortex - Fixed positioning and containment */}
       <section className="relative py-20 bg-black mt-10 mb-20">
         <Vortex
@@ -268,7 +263,7 @@ export default function AboutPage() {
               animate={{ opacity: 1 }}
               transition={{ duration: 0.5 }}
             >
-              <motion.h2 
+              <motion.h2
                 className="text-3xl font-bold mb-6 drop-shadow-lg bg-clip-text text-transparent bg-gradient-to-r from-emerald-400 to-blue-400"
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
@@ -276,7 +271,7 @@ export default function AboutPage() {
               >
                 Join Us in Transforming Education
               </motion.h2>
-              <motion.p 
+              <motion.p
                 className="text-white mb-8 max-w-2xl mx-auto"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
@@ -289,13 +284,13 @@ export default function AboutPage() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: 0.4 }}
               >
-                <Link 
+                <Link
                   href="/courses/all-courses"
                   className="inline-block bg-gradient-to-r from-blue-600 to-emerald-600 hover:from-blue-700 hover:to-emerald-700 text-white px-8 py-3 rounded-md font-medium mr-4 transition-all shadow-lg shadow-blue-500/30"
                 >
                   Explore Courses
                 </Link>
-                <Link 
+                <Link
                   href="/auth/signup"
                   className="inline-block bg-transparent border border-white text-white px-8 py-3 rounded-md font-medium hover:bg-white/10 transition-colors shadow-lg"
                 >
@@ -306,10 +301,10 @@ export default function AboutPage() {
           </div>
         </Vortex>
       </section>
-      
-     <div className="mt-32 relative z-10">
-     <Footer />
-     </div>
+
+      <div className="mt-32 relative z-10">
+        <Footer />
+      </div>
     </div>
   );
 }

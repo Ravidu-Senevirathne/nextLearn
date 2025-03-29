@@ -3,17 +3,23 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev --turbopack",
+    "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "clean": "rm -rf .next",
+    "rebuild": "npm run clean && npm run build",
+    "deploy": "npm run build && npm run start"
   },
   "dependencies": {
     "@radix-ui/react-label": "^2.1.2",
     "@tabler/icons-react": "^3.31.0",
+    "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "critters": "^0.0.23",
+    "framer-motion": "^12.5.0",
     "lucide-react": "^0.477.0",
-    "motion": "^12.5.0",
+    "motion": "^12.6.2",
     "next": "15.2.0",
     "next-auth": "^4.24.11",
     "react": "^19.0.0",

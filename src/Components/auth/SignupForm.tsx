@@ -1,184 +1,215 @@
 "use client";
 
-import React, { useState } from "react";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { signIn } from "next-auth/react";
+import { Input } from "@/Components/ui/input";
 import Link from "next/link";
-import { FaGoogle, FaFacebook } from "react-icons/fa";
-import { Spotlight } from "@/Components/ui/Spotlight";
 
 export default function SignupForm() {
-  const [role, setRole] = useState<"student" | "lecturer" | null>(null);
-  const [focusedInput, setFocusedInput] = useState<string | null>(null);
+  const router = useRouter();
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+    setError("");
+
+    // Validate passwords match
+    if (password !== confirmPassword) {
+      setError("Passwords don't match");
+      setIsLoading(false);
+      return;
+    }
+
+    try {
+      // This would be a call to your API to create a user
+      const response = await fetch("/api/auth/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, email, password }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Registration failed");
+      }
+
+      // Auto sign-in after successful registration
+      await signIn("credentials", {
+        redirect: false,
+        email,
+        password,
+      });
+
+      // Redirect to dashboard
+      router.push("/dashboard");
+    } catch (err: any) {
+      setError(err.message || "Something went wrong during registration");
+      setIsLoading(false);
+    }
+  };
 
   return (
-    <div className="relative flex min-h-screen w-full overflow-hidden bg-black/[0.96] antialiased">
-      <div className="absolute inset-0 pointer-events-none [background-size:40px_40px] [background-image:linear-gradient(to_right,#171717_1px,transparent_1px),linear-gradient(to_bottom,#171717_1px,transparent_1px)]" />
-      
-      <Spotlight className="-top-40 left-0 md:left-60" fill="white" />
-      
-      <div className="relative z-10 mx-auto w-full max-w-7xl px-4 py-20 md:py-32 pointer-events-auto">
-        <div className="mx-auto max-w-md">
-          <div className="text-center mb-8">
-            <h1 className="bg-gradient-to-b from-neutral-50 to-neutral-400 bg-clip-text text-4xl font-bold text-transparent">
-              Join NextLearn
-            </h1>
-            <p className="mt-2 text-neutral-400">
-              Create your account and start learning today
-            </p>
+    <div className="w-full max-w-md mx-auto space-y-6 relative z-10">
+      <div className="text-center">
+        <h1 className="text-3xl font-bold mb-2">Create an account</h1>
+        <p className="text-gray-500 dark:text-gray-400">
+          Join NextLearn to start your learning journey
+        </p>
+      </div>
+
+      {error && (
+        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative">
+          <span className="block sm:inline">{error}</span>
+        </div>
+      )}
+
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div>
+          <label htmlFor="name" className="block text-sm font-medium mb-1">
+            Full Name
+          </label>
+          <Input
+            id="name"
+            type="text"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            required
+            className="w-full"
+            placeholder="John Doe"
+            disabled={isLoading}
+          />
+        </div>
+
+        <div>
+          <label htmlFor="email" className="block text-sm font-medium mb-1">
+            Email
+          </label>
+          <Input
+            id="email"
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+            className="w-full"
+            placeholder="you@example.com"
+            disabled={isLoading}
+          />
+        </div>
+
+        <div>
+          <label htmlFor="password" className="block text-sm font-medium mb-1">
+            Password
+          </label>
+          <Input
+            id="password"
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+            className="w-full"
+            placeholder="••••••••"
+            disabled={isLoading}
+          />
+        </div>
+
+        <div>
+          <label htmlFor="confirmPassword" className="block text-sm font-medium mb-1">
+            Confirm Password
+          </label>
+          <Input
+            id="confirmPassword"
+            type="password"
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+            required
+            className="w-full"
+            placeholder="••••••••"
+            disabled={isLoading}
+          />
+        </div>
+
+        <button
+          type="submit"
+          className="w-full py-3 px-4 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-md transition duration-200 flex items-center justify-center"
+          disabled={isLoading}
+        >
+          {isLoading ? (
+            <>
+              <svg
+                className="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+              >
+                <circle
+                  className="opacity-25"
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                  strokeWidth="4"
+                ></circle>
+                <path
+                  className="opacity-75"
+                  fill="currentColor"
+                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                ></path>
+              </svg>
+              Creating account...
+            </>
+          ) : (
+            "Sign up"
+          )}
+        </button>
+      </form>
+
+      <div className="mt-6">
+        <div className="relative">
+          <div className="absolute inset-0 flex items-center">
+            <div className="w-full border-t border-gray-300"></div>
           </div>
-
-          <div className="relative z-20 bg-black/30 border border-white/10 rounded-xl p-6 backdrop-blur-sm">
-            {/* Role Selection */}
-            <div className="mb-6">
-              <label className="block text-neutral-300 mb-2 text-sm">I am a:</label>
-              <div className="grid grid-cols-2 gap-4">
-                <button
-                  type="button"
-                  onClick={() => setRole("student")}
-                  className={`py-4 px-6 rounded-lg border transition-all duration-300 ease-in-out cursor-pointer transform hover:scale-105 ${
-                    role === "student"
-                      ? "bg-indigo-600 border-indigo-500 text-white shadow-lg shadow-indigo-500/50"
-                      : "border-neutral-700 text-neutral-300 hover:bg-indigo-900/20 hover:border-indigo-500/50"
-                  }`}
-                >
-                  Student
-                  {role === "student" && (
-                    <span className="absolute inset-0 rounded-lg border-2 border-indigo-500 animate-pulse" />
-                  )}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setRole("lecturer")}
-                  className={`py-4 px-6 rounded-lg border transition-all duration-300 ease-in-out cursor-pointer transform hover:scale-105 ${
-                    role === "lecturer"
-                      ? "bg-indigo-600 border-indigo-500 text-white shadow-lg shadow-indigo-500/50"
-                      : "border-neutral-700 text-neutral-300 hover:bg-indigo-900/20 hover:border-indigo-500/50"
-                  }`}
-                >
-                  Lecturer
-                  {role === "lecturer" && (
-                    <span className="absolute inset-0 rounded-lg border-2 border-indigo-500 animate-pulse" />
-                  )}
-                </button>
-              </div>
-            </div>
-
-            {/* Signup Form */}
-            <form className="space-y-6">
-              <div className="relative">
-                <label className="block text-neutral-300 mb-1 text-sm">Full Name</label>
-                <div className="relative">
-                  <input
-                    type="text"
-                    className="w-full bg-black/50 border border-neutral-700 rounded-lg py-4 px-5 text-white text-lg focus:outline-none"
-                    placeholder="Enter your full name"
-                    onFocus={() => setFocusedInput("name")}
-                    onBlur={() => setFocusedInput(null)}
-                  />
-                  {focusedInput === "name" && (
-                    <div className="pointer-events-none absolute -inset-px rounded-lg border-2 border-indigo-500 blur-sm" />
-                  )}
-                </div>
-              </div>
-              
-              <div className="relative">
-                <label className="block text-neutral-300 mb-1 text-sm">Email Address</label>
-                <div className="relative">
-                  <input
-                    type="email"
-                    className="w-full bg-black/50 border border-neutral-700 rounded-lg py-4 px-5 text-white text-lg focus:outline-none"
-                    placeholder="Enter your email"
-                    onFocus={() => setFocusedInput("email")}
-                    onBlur={() => setFocusedInput(null)}
-                  />
-                  {focusedInput === "email" && (
-                    <div className="pointer-events-none absolute -inset-px rounded-lg border-2 border-indigo-500 blur-sm" />
-                  )}
-                </div>
-              </div>
-              
-              <div className="relative">
-                <label className="block text-neutral-300 mb-1 text-sm">Password</label>
-                <div className="relative">
-                  <input
-                    type="password"
-                    className="w-full bg-black/50 border border-neutral-700 rounded-lg py-4 px-5 text-white text-lg focus:outline-none"
-                    placeholder="Create a strong password"
-                    onFocus={() => setFocusedInput("password")}
-                    onBlur={() => setFocusedInput(null)}
-                  />
-                  {focusedInput === "password" && (
-                    <div className="pointer-events-none absolute -inset-px rounded-lg border-2 border-indigo-500 blur-sm" />
-                  )}
-                </div>
-              </div>
-
-              <div className="relative">
-                <label className="block text-neutral-300 mb-1 text-sm">Confirm Password</label>
-                <div className="relative">
-                  <input
-                    type="password"
-                    className="w-full bg-black/50 border border-neutral-700 rounded-lg py-4 px-5 text-white text-lg focus:outline-none"
-                    placeholder="Confirm your password"
-                    onFocus={() => setFocusedInput("confirmPassword")}
-                    onBlur={() => setFocusedInput(null)}
-                  />
-                  {focusedInput === "confirmPassword" && (
-                    <div className="pointer-events-none absolute -inset-px rounded-lg border-2 border-indigo-500 blur-sm" />
-                  )}
-                </div>
-              </div>
-              
-              <div className="relative mt-8">
-                <button
-                  type="submit"
-                  disabled={!role}
-                  className={`w-full text-white py-4 rounded-lg font-medium transition-all duration-300 ease-in-out text-lg transform hover:scale-105 ${
-                    !role 
-                      ? "bg-indigo-600/50 cursor-not-allowed opacity-70" 
-                      : "bg-indigo-600 hover:bg-indigo-700 cursor-pointer shadow-lg shadow-indigo-500/50"
-                  }`}
-                >
-                  Sign Up
-                </button>
-              </div>
-            </form>
-
-            <div className="my-6 flex items-center">
-              <div className="flex-1 border-t border-neutral-800"></div>
-              <div className="mx-4 text-sm text-neutral-400">Or continue with</div>
-              <div className="flex-1 border-t border-neutral-800"></div>
-            </div>
-
-            {/* Social Login Buttons */}
-            <div className="grid grid-cols-2 gap-4">
-              <button 
-                type="button"
-                className="flex items-center justify-center gap-2 bg-transparent border border-neutral-700 hover:bg-neutral-800/50 hover:border-red-500/30 py-4 rounded-lg text-white transition-all duration-300 transform hover:scale-105"
-              >
-                <FaGoogle className="text-red-500" />
-                <span>Google</span>
-              </button>
-              <button 
-                type="button"
-                className="flex items-center justify-center gap-2 bg-transparent border border-neutral-700 hover:bg-neutral-800/50 hover:border-blue-500/30 py-4 rounded-lg text-white transition-all duration-300 transform hover:scale-105"
-              >
-                <FaFacebook className="text-blue-500" />
-                <span>Facebook</span>
-              </button>
-            </div>
-
-            <p className="mt-6 text-center text-sm text-neutral-400">
-              Already have an account?{" "}
-              <Link 
-                href="/auth/login" 
-                className="text-indigo-400 hover:text-indigo-300 transition-colors"
-              >
-                Log in
-              </Link>
-            </p>
+          <div className="relative flex justify-center text-sm">
+            <span className="px-2 bg-white dark:bg-black text-gray-500">
+              Or continue with
+            </span>
           </div>
         </div>
+
+        <div className="mt-6 grid grid-cols-2 gap-3">
+          <button
+            type="button"
+            className="w-full py-2.5 px-4 border border-gray-300 rounded-md shadow-sm bg-white dark:bg-transparent text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800"
+            onClick={() => signIn("google", { callbackUrl: "/dashboard" })}
+          >
+            Google
+          </button>
+          <button
+            type="button"
+            className="w-full py-2.5 px-4 border border-gray-300 rounded-md shadow-sm bg-white dark:bg-transparent text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800"
+            onClick={() => signIn("github", { callbackUrl: "/dashboard" })}
+          >
+            GitHub
+          </button>
+        </div>
       </div>
+
+      <p className="text-center text-sm text-gray-600 dark:text-gray-400 mt-6">
+        Already have an account?{" "}
+        <Link
+          href="/auth/login"
+          className="font-medium text-blue-600 hover:text-blue-500"
+        >
+          Sign in
+        </Link>
+      </p>
     </div>
   );
 }
