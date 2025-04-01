@@ -1,14 +1,20 @@
-export default function StudentDashboardLayout({
+import { getServerSession } from "next-auth/next";
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { redirect } from "next/navigation";
+
+export default async function StudentDashboardLayout({
     children,
 }: {
     children: React.ReactNode;
 }) {
-    return (
-        <div className="flex min-h-screen flex-col">
-           
-            <main className="flex-1">
-                <div className="container py-6">{children}</div>
-            </main>
-        </div>
-    );
+    // Check session on the server side
+    const session = await getServerSession(authOptions);
+
+    // Redirect to login if no session or incorrect role
+    if (!session || !session.user || session.user.role !== "student") {
+        redirect("/auth/login");
+    }
+
+    // Return children directly without wrapper divs that create extra scrollable containers
+    return children;
 }

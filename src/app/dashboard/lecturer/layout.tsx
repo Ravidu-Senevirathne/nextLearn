@@ -1,14 +1,21 @@
-export default function LecturerDashboardLayout({
+import { getServerSession } from "next-auth/next";
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { redirect } from "next/navigation";
+
+export default async function LecturerDashboardLayout({
     children,
 }: {
     children: React.ReactNode;
 }) {
-    return (
-        <div className="flex min-h-screen flex-col">
-       
-            <main className="flex-1">
-                <div className="container py-6">{children}</div>
-            </main>
-        </div>
-    );
+    // Check session on the server side
+    const session = await getServerSession(authOptions);
+
+    // Redirect to login if no session or incorrect role
+    if (!session || !session.user || session.user.role !== "lecturer") {
+        redirect("/auth/login");
+    }
+
+    // Return the children directly without additional containers
+    // This lets the dashboard component handle its own layout
+    return children;
 }

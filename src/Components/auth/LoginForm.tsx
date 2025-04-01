@@ -30,17 +30,17 @@ export default function LoginForm() {
         throw new Error(result.error || "Authentication failed");
       }
 
-      // Success! Get the user role from session and redirect accordingly
-      // NextAuth JWT callback already included the role from the API response
-      // so we don't need to make a separate API call
+      // We need to wait for the session to update
+      // Get user session to determine role-based routing
+      const response = await fetch('/api/auth/session');
+      const session = await response.json();
 
-      // In case we need to get user role from session in future
-      // const session = await getSession();
-      // const userRole = session?.user?.role;
+      if (!session || !session.user) {
+        throw new Error("Failed to retrieve session");
+      }
 
-      // For now, we'll use localStorage to determine where to redirect
-      // This will be set correctly from the NextAuth session in real usage
-      const userRole = localStorage.getItem('userRole') || 'student';
+      // Use the role from the session
+      const userRole = session.user.role || 'student';
 
       // Redirect based on role
       router.replace(userRole === "lecturer" ? "/dashboard/lecturer" : "/dashboard/student");

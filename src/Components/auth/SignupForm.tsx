@@ -41,10 +41,7 @@ export default function SignupForm() {
         throw new Error(errorData.message || `Registration failed: ${response.statusText}`);
       }
 
-      const data = await response.json();
-
-      // Store the role in localStorage for retrieval after auth
-      localStorage.setItem('userRole', role);
+      await response.json();
 
       // Sign in after registration with redirect:false to prevent automatic redirection
       const result = await signIn("credentials", {

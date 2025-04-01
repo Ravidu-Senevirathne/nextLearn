@@ -21,7 +21,7 @@ const DashboardLayout: React.FC<LayoutProps> = ({
     };
 
     return (
-        <div className="flex h-screen bg-gray-950 text-gray-100">
+        <div className="flex h-screen bg-gray-950 text-gray-100 overflow-hidden">
             {/* Mobile Sidebar Toggle */}
             <div className="lg:hidden fixed top-4 left-4 z-50">
                 <button
@@ -41,14 +41,14 @@ const DashboardLayout: React.FC<LayoutProps> = ({
             </div>
 
             {/* Sidebar - Desktop */}
-            <div className={`hidden lg:block bg-gray-900 ${sidebarOpen ? 'w-64' : 'w-20'} transition-all duration-300 p-4 overflow-y-auto`}>
+            <div className={`hidden lg:block bg-gray-900 ${sidebarOpen ? 'w-64' : 'w-20'} flex-shrink-0 transition-all duration-300 p-4 overflow-y-auto`}>
                 <Sidebar sidebarOpen={sidebarOpen} toggleSidebar={toggleSidebar} />
             </div>
 
             {/* Main Content */}
-            <div className="flex-1 overflow-x-hidden overflow-y-auto">
+            <div className="flex-1 flex flex-col overflow-hidden">
                 {/* Top nav */}
-                <header className="sticky top-0 z-30 bg-gray-900/90 backdrop-blur-sm border-b border-gray-800 p-4">
+                <header className="sticky top-0 z-30 bg-gray-900/90 backdrop-blur-sm border-b border-gray-800 p-4 flex-shrink-0">
                     <div className="flex justify-between items-center">
                         <div className="flex items-center">
                             <button
@@ -82,8 +82,8 @@ const DashboardLayout: React.FC<LayoutProps> = ({
                     </div>
                 </header>
 
-                {/* Dashboard Content */}
-                <main className="px-4 py-6 md:px-6 lg:px-8">
+                {/* Dashboard Content - Fixed scrolling */}
+                <main className="flex-1 overflow-y-auto px-4 py-6 md:px-6 lg:px-8">
                     {children}
                 </main>
             </div>

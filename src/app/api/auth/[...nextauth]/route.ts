@@ -1,6 +1,17 @@
 import NextAuth from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
+import GoogleProvider from "next-auth/providers/google";
+import GithubProvider from "next-auth/providers/github";
 import { NextAuthOptions } from "next-auth";
+
+// More robust secret handling
+const getSecret = () => {
+    const secret = process.env.NEXTAUTH_SECRET;
+    if (!secret) {
+        throw new Error("Missing NEXTAUTH_SECRET environment variable");
+    }
+    return secret;
+};
 
 export const authOptions: NextAuthOptions = {
     providers: [
@@ -54,19 +65,35 @@ export const authOptions: NextAuthOptions = {
                 }
             },
         }),
+        // Add these if you have them configured in your environment variables
+        // Otherwise they will be properly skipped by NextAuth
+        ...(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET ? [
+            GoogleProvider({
+                clientId: process.env.GOOGLE_CLIENT_ID,
+                clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+            })
+        ] : []),
+        ...(process.env.GITHUB_ID && process.env.GITHUB_SECRET ? [
+            GithubProvider({
+                clientId: process.env.GITHUB_ID,
+                clientSecret: process.env.GITHUB_SECRET,
+            })
+        ] : []),
     ],
+    secret: process.env.NEXTAUTH_SECRET, // Direct reference rather than through function
+    debug: process.env.NODE_ENV === "development",
     callbacks: {
-        async jwt({ token, user }) {
-            // Add role to JWT token when user signs in
+        async jwt({ token, user, account }) {
+            // If user object exists (on sign-in), add role to token
             if (user) {
                 token.role = user.role;
             }
             return token;
         },
         async session({ session, token }) {
-            // Add role to session
+            // Add role from token to session user
             if (session.user) {
-                session.user.role = token.role as string;
+                session.user.role = token.role;
             }
             return session;
         },
@@ -74,12 +101,13 @@ export const authOptions: NextAuthOptions = {
     pages: {
         signIn: "/auth/login",
         signOut: "/auth/logout",
+        error: "/auth/error",
     },
     session: {
         strategy: "jwt",
+        maxAge: 30 * 24 * 60 * 60, // 30 days
     },
 };
 
 const handler = NextAuth(authOptions);
-
 export { handler as GET, handler as POST };

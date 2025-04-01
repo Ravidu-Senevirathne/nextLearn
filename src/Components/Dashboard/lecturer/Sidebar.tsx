@@ -23,6 +23,13 @@ interface SidebarProps {
     toggleSidebar: () => void;
 }
 
+// Create a LogoutButtonWrapper component that doesn't pass children to LogoutButton
+const LogoutButtonWrapper = ({ className, variant }: { className?: string, variant?: string }) => {
+    return (
+        <LogoutButton variant={variant as any} className={className} />
+    );
+};
+
 const Sidebar: React.FC<SidebarProps> = ({ sidebarOpen, toggleSidebar }) => {
     const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
 
@@ -221,13 +228,10 @@ const Sidebar: React.FC<SidebarProps> = ({ sidebarOpen, toggleSidebar }) => {
 
             {/* Logout button */}
             <div className="mt-auto pt-8">
-                <LogoutButton
+                <LogoutButtonWrapper
                     variant="ghost"
-                    className="w-full flex items-center justify-start px-3 py-2 rounded-md hover:bg-gray-800 transition-colors text-gray-400 hover:text-white"
-                >
-                    <LogOut size={sidebarOpen ? 18 : 20} className="min-w-5" />
-                    {sidebarOpen && <span className="ml-3">Logout</span>}
-                </LogoutButton>
+                    className="w-full justify-start"
+                />
             </div>
         </>
     );
