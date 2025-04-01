@@ -18,6 +18,7 @@ import {
     ChevronUp,
     GraduationCap
 } from 'lucide-react';
+import LogoutButton from '@/Components/auth/LogoutButton';
 
 interface SidebarProps {
     sidebarOpen: boolean;
@@ -210,13 +211,13 @@ const Sidebar: React.FC<SidebarProps> = ({ sidebarOpen, toggleSidebar }) => {
 
             {/* Logout button */}
             <div className="mt-auto pt-8">
-                <Link
-                    href="/logout"
-                    className="flex items-center px-3 py-2 rounded-md hover:bg-gray-800 transition-colors text-gray-400 hover:text-white"
+                <LogoutButton
+                    variant="ghost"
+                    className="w-full flex items-center justify-start px-3 py-2 rounded-md hover:bg-gray-800 transition-colors text-gray-400 hover:text-white"
                 >
                     <LogOut size={sidebarOpen ? 18 : 20} className="min-w-5" />
                     {sidebarOpen && <span className="ml-3">Logout</span>}
-                </Link>
+                </LogoutButton>
             </div>
         </>
     );
