@@ -35,11 +35,13 @@ export default function SignupForm() {
         body: JSON.stringify({ name, email, password, mobile, role }),
       });
 
-      const data = await response.json();
-
+      // Handle non-OK responses
       if (!response.ok) {
-        throw new Error(data.message || "Registration failed");
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || `Registration failed: ${response.statusText}`);
       }
+
+      const data = await response.json();
 
       // Store the role in localStorage for retrieval after auth
       localStorage.setItem('userRole', role);
@@ -52,12 +54,13 @@ export default function SignupForm() {
       });
 
       if (result?.error) {
-        throw new Error("Sign-in failed after registration");
+        throw new Error("Sign-in failed after registration: " + result.error);
       }
 
       // Manually redirect based on role
       router.replace(role === "lecturer" ? "/dashboard/lecturer" : "/dashboard/student");
     } catch (err: any) {
+      console.error("Registration error:", err);
       setError(err.message || "Something went wrong during registration");
       setIsLoading(false);
     }

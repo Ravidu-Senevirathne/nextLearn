@@ -26,11 +26,20 @@ export const authOptions: NextAuthOptions = {
                         }),
                     });
 
+                    // Handle non-OK responses with detailed error messages
                     if (!response.ok) {
-                        throw new Error("Invalid credentials");
+                        const errorData = await response.json().catch(() => null);
+                        const errorMessage = errorData?.message || `Error ${response.status}: ${response.statusText}`;
+                        console.error("Authentication API error:", errorMessage);
+                        throw new Error(errorMessage);
                     }
 
                     const userData = await response.json();
+
+                    // Verify that user data structure is as expected
+                    if (!userData || !userData.user) {
+                        throw new Error("Invalid response structure from authentication server");
+                    }
 
                     // Return user data including role
                     return {
@@ -39,8 +48,9 @@ export const authOptions: NextAuthOptions = {
                         name: userData.user.name,
                         role: userData.user.role,
                     };
-                } catch (error) {
-                    throw new Error("Authentication failed");
+                } catch (error: any) {
+                    console.error("Authentication error:", error);
+                    throw new Error(error?.message || "Authentication failed");
                 }
             },
         }),

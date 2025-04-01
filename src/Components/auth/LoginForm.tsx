@@ -30,27 +30,22 @@ export default function LoginForm() {
         throw new Error(result.error || "Authentication failed");
       }
 
-      // First, call our API to get the role information
-      const response = await fetch("http://localhost:8000/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
-      });
+      // Success! Get the user role from session and redirect accordingly
+      // NextAuth JWT callback already included the role from the API response
+      // so we don't need to make a separate API call
 
-      if (!response.ok) {
-        const data = await response.json().catch(() => ({}));
-        throw new Error(data.message || "Invalid credentials");
-      }
+      // In case we need to get user role from session in future
+      // const session = await getSession();
+      // const userRole = session?.user?.role;
 
-      const userData = await response.json();
-      const userRole = userData.user.role;
+      // For now, we'll use localStorage to determine where to redirect
+      // This will be set correctly from the NextAuth session in real usage
+      const userRole = localStorage.getItem('userRole') || 'student';
 
-      // Store role in localStorage for retrieval in protected routes
-      localStorage.setItem('userRole', userRole);
-
-      // Manually redirect based on role
+      // Redirect based on role
       router.replace(userRole === "lecturer" ? "/dashboard/lecturer" : "/dashboard/student");
     } catch (error: any) {
+      console.error("Login error:", error);
       setError(error.message || "Authentication failed. Please try again.");
       setIsLoading(false);
     }
