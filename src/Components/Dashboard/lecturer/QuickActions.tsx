@@ -23,6 +23,13 @@ const QuickActions: React.FC = () => {
         return colorMap[darkClass] || darkClass;
     };
 
+    // Added container styling based on theme
+    const getContainerStyle = () => {
+        return theme === 'dark'
+            ? 'bg-gray-900 border border-gray-800 rounded-lg p-4 shadow-md mb-8'
+            : 'mb-8';
+    };
+
     const renderQuickAction = (title: string, bgClass: string, icon: React.ReactNode) => {
         return (
             <Link href="#" className={`${getBgClass(bgClass)} p-4 rounded-lg transition-all hover:-translate-y-1 flex flex-col items-center justify-center text-center text-white`}>
@@ -33,8 +40,8 @@ const QuickActions: React.FC = () => {
     };
 
     return (
-        <div className="mb-8">
-            <h3 className={`text-lg font-semibold mb-4 ${theme === 'light' && 'text-slate-800'}`}>Quick Actions</h3>
+        <div className={getContainerStyle()}>
+            <h3 className={`text-lg font-semibold mb-4 ${theme === 'light' ? 'text-slate-800' : 'text-gray-100'}`}>Quick Actions</h3>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 {renderQuickAction('Create New Course', 'bg-blue-600 hover:bg-blue-700', <PlusCircle size={20} />)}
                 {renderQuickAction('Upload Lesson', 'bg-green-600 hover:bg-green-700', <Upload size={20} />)}
