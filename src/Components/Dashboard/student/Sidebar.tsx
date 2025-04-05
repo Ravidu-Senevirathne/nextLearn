@@ -55,7 +55,7 @@ const Sidebar: React.FC<SidebarProps> = ({ sidebarOpen, toggleSidebar }) => {
                 </Link>
                 <button
                     onClick={toggleSidebar}
-                    className="p-1 rounded-md hover:bg-gray-800 focus:outline-none hidden lg:block"
+                    className="p-1 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 focus:outline-none hidden lg:block"
                 >
                     {sidebarOpen ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
                 </button>
@@ -65,7 +65,7 @@ const Sidebar: React.FC<SidebarProps> = ({ sidebarOpen, toggleSidebar }) => {
             <div className="space-y-1">
                 <Link
                     href="/dashboard/student"
-                    className="flex items-center px-3 py-2 rounded-md hover:bg-gray-800 transition-colors text-gray-300 hover:text-white"
+                    className="flex items-center px-3 py-2 rounded-md bg-transparent hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
                 >
                     <Home size={sidebarOpen ? 18 : 20} className="min-w-5" />
                     {sidebarOpen && <span className="ml-3">Dashboard</span>}
@@ -74,7 +74,7 @@ const Sidebar: React.FC<SidebarProps> = ({ sidebarOpen, toggleSidebar }) => {
                 <div>
                     <button
                         onClick={() => toggleDropdown('courses')}
-                        className="w-full flex items-center justify-between px-3 py-2 rounded-md hover:bg-gray-800 transition-colors text-gray-300 hover:text-white"
+                        className="w-full flex items-center justify-between px-3 py-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
                     >
                         <div className="flex items-center">
                             <BookOpen size={sidebarOpen ? 18 : 20} className="min-w-5" />
@@ -91,19 +91,19 @@ const Sidebar: React.FC<SidebarProps> = ({ sidebarOpen, toggleSidebar }) => {
                         <div className="ml-6 mt-1 space-y-1">
                             <Link
                                 href="/dashboard/student/courses"
-                                className="block px-3 py-2 rounded-md hover:bg-gray-800 text-gray-400 hover:text-white text-sm transition-colors"
+                                className="block px-3 py-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white text-sm transition-colors"
                             >
                                 My Courses
                             </Link>
                             <Link
                                 href="/dashboard/student/courses/explore"
-                                className="block px-3 py-2 rounded-md hover:bg-gray-800 text-gray-400 hover:text-white text-sm transition-colors"
+                                className="block px-3 py-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white text-sm transition-colors"
                             >
                                 Explore Courses
                             </Link>
                             <Link
                                 href="/dashboard/student/courses/saved"
-                                className="block px-3 py-2 rounded-md hover:bg-gray-800 text-gray-400 hover:text-white text-sm transition-colors"
+                                className="block px-3 py-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white text-sm transition-colors"
                             >
                                 Saved Courses
                             </Link>
@@ -114,7 +114,7 @@ const Sidebar: React.FC<SidebarProps> = ({ sidebarOpen, toggleSidebar }) => {
                 <div>
                     <button
                         onClick={() => toggleDropdown('assignments')}
-                        className="w-full flex items-center justify-between px-3 py-2 rounded-md hover:bg-gray-800 transition-colors text-gray-300 hover:text-white"
+                        className="w-full flex items-center justify-between px-3 py-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
                     >
                         <div className="flex items-center">
                             <FileText size={sidebarOpen ? 18 : 20} className="min-w-5" />
@@ -131,19 +131,19 @@ const Sidebar: React.FC<SidebarProps> = ({ sidebarOpen, toggleSidebar }) => {
                         <div className="ml-6 mt-1 space-y-1">
                             <Link
                                 href="/dashboard/student/assignments/pending"
-                                className="block px-3 py-2 rounded-md hover:bg-gray-800 text-gray-400 hover:text-white text-sm transition-colors"
+                                className="block px-3 py-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white text-sm transition-colors"
                             >
                                 Pending
                             </Link>
                             <Link
                                 href="/dashboard/student/assignments/submitted"
-                                className="block px-3 py-2 rounded-md hover:bg-gray-800 text-gray-400 hover:text-white text-sm transition-colors"
+                                className="block px-3 py-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white text-sm transition-colors"
                             >
                                 Submitted
                             </Link>
                             <Link
                                 href="/dashboard/student/assignments/grades"
-                                className="block px-3 py-2 rounded-md hover:bg-gray-800 text-gray-400 hover:text-white text-sm transition-colors"
+                                className="block px-3 py-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white text-sm transition-colors"
                             >
                                 Grades
                             </Link>
@@ -153,7 +153,7 @@ const Sidebar: React.FC<SidebarProps> = ({ sidebarOpen, toggleSidebar }) => {
 
                 <Link
                     href="/dashboard/student/quizzes"
-                    className="flex items-center px-3 py-2 rounded-md hover:bg-gray-800 transition-colors text-gray-300 hover:text-white"
+                    className="flex items-center px-3 py-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
                 >
                     <GraduationCap size={sidebarOpen ? 18 : 20} className="min-w-5" />
                     {sidebarOpen && <span className="ml-3">Quizzes</span>}
@@ -161,7 +161,7 @@ const Sidebar: React.FC<SidebarProps> = ({ sidebarOpen, toggleSidebar }) => {
 
                 <Link
                     href="/dashboard/student/schedule"
-                    className="flex items-center px-3 py-2 rounded-md hover:bg-gray-800 transition-colors text-gray-300 hover:text-white"
+                    className="flex items-center px-3 py-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
                 >
                     <Calendar size={sidebarOpen ? 18 : 20} className="min-w-5" />
                     {sidebarOpen && <span className="ml-3">Schedule</span>}
@@ -169,7 +169,7 @@ const Sidebar: React.FC<SidebarProps> = ({ sidebarOpen, toggleSidebar }) => {
 
                 <Link
                     href="/dashboard/student/materials"
-                    className="flex items-center px-3 py-2 rounded-md hover:bg-gray-800 transition-colors text-gray-300 hover:text-white"
+                    className="flex items-center px-3 py-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
                 >
                     <Download size={sidebarOpen ? 18 : 20} className="min-w-5" />
                     {sidebarOpen && <span className="ml-3">Materials</span>}
@@ -177,7 +177,7 @@ const Sidebar: React.FC<SidebarProps> = ({ sidebarOpen, toggleSidebar }) => {
 
                 <Link
                     href="/dashboard/student/grades"
-                    className="flex items-center px-3 py-2 rounded-md hover:bg-gray-800 transition-colors text-gray-300 hover:text-white"
+                    className="flex items-center px-3 py-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
                 >
                     <BarChart2 size={sidebarOpen ? 18 : 20} className="min-w-5" />
                     {sidebarOpen && <span className="ml-3">Grades</span>}
@@ -185,7 +185,7 @@ const Sidebar: React.FC<SidebarProps> = ({ sidebarOpen, toggleSidebar }) => {
 
                 <Link
                     href="/dashboard/student/notifications"
-                    className="flex items-center px-3 py-2 rounded-md hover:bg-gray-800 transition-colors text-gray-300 hover:text-white"
+                    className="flex items-center px-3 py-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
                 >
                     <Bell size={sidebarOpen ? 18 : 20} className="min-w-5" />
                     {sidebarOpen && <span className="ml-3">Notifications</span>}
@@ -193,7 +193,7 @@ const Sidebar: React.FC<SidebarProps> = ({ sidebarOpen, toggleSidebar }) => {
 
                 <Link
                     href="/dashboard/student/messages"
-                    className="flex items-center px-3 py-2 rounded-md hover:bg-gray-800 transition-colors text-gray-300 hover:text-white"
+                    className="flex items-center px-3 py-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
                 >
                     <MessageSquare size={sidebarOpen ? 18 : 20} className="min-w-5" />
                     {sidebarOpen && <span className="ml-3">Messages</span>}
@@ -201,7 +201,7 @@ const Sidebar: React.FC<SidebarProps> = ({ sidebarOpen, toggleSidebar }) => {
 
                 <Link
                     href="/dashboard/student/profile"
-                    className="flex items-center px-3 py-2 rounded-md hover:bg-gray-800 transition-colors text-gray-300 hover:text-white"
+                    className="flex items-center px-3 py-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
                 >
                     <User size={sidebarOpen ? 18 : 20} className="min-w-5" />
                     {sidebarOpen && <span className="ml-3">Profile</span>}
@@ -209,7 +209,7 @@ const Sidebar: React.FC<SidebarProps> = ({ sidebarOpen, toggleSidebar }) => {
 
                 <Link
                     href="/dashboard/student/settings"
-                    className="flex items-center px-3 py-2 rounded-md hover:bg-gray-800 transition-colors text-gray-300 hover:text-white"
+                    className="flex items-center px-3 py-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
                 >
                     <Settings size={sidebarOpen ? 18 : 20} className="min-w-5" />
                     {sidebarOpen && <span className="ml-3">Settings</span>}
@@ -220,7 +220,7 @@ const Sidebar: React.FC<SidebarProps> = ({ sidebarOpen, toggleSidebar }) => {
             <div className="mt-auto pt-8">
                 <LogoutButtonWrapper
                     variant="ghost"
-                    className="w-full justify-start"
+                    className="w-full justify-start text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
                 />
             </div>
         </>

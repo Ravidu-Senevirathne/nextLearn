@@ -2,7 +2,6 @@
 
 import React from 'react';
 import { BookOpen, Users, FileText, CheckCircle } from 'lucide-react';
-import DashboardLayout from '@/Components/Dashboard/lecturer/Layout';
 import StatCard from '@/Components/Dashboard/lecturer/StatCard';
 import QuickActions from '@/Components/Dashboard/lecturer/QuickActions';
 import EventsList from '@/Components/Dashboard/lecturer/EventsList';
@@ -46,7 +45,7 @@ const popularCourses: Course[] = [
  */
 const LecturerDashboard = () => {
   return (
-    <DashboardLayout>
+    <>
       {/* Welcome section */}
       <section className="mb-8">
         <h2 className="text-2xl font-bold mb-1">Welcome back, Dr. Smith!</h2>
@@ -83,7 +82,7 @@ const LecturerDashboard = () => {
       <section className="mt-6">
         <CoursesList courses={popularCourses} />
       </section>
-    </DashboardLayout>
+    </>
   );
 };
 

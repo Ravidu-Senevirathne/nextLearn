@@ -10,6 +10,18 @@
   --foreground: #171717;
 }
 
+[data-theme="light"] {
+  --background: #f9f9f9;
+  --foreground: #333333;
+  --primary: #6366f1; /* Example: Indigo-500 */
+  --secondary: #3b82f6; /* Example: Blue-500 */
+  --accent: #10b981; /* Example: Emerald-500 */
+  --text-muted: #6b7280; /* Example: Gray-500 */
+  --border-color: #d1d5db; /* Example: Gray-300 */
+  --card-background: #ffffff;
+  --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
 @media (prefers-color-scheme: dark) {
   :root {
     --background: #0a0a0a;
@@ -22,6 +34,7 @@ body {
   background: var(--background);
   font-family: Arial, Helvetica, sans-serif;
   overflow-x: hidden; /* Prevent horizontal scrolling */
+  transition: background-color 0.3s, color 0.3s;
 }
 
 /* Glowing Effect Styles */

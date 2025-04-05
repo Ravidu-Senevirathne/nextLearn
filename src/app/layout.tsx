@@ -14,9 +14,11 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body
-        className={`${geist.variable} ${geistMono.variable} ${inter.variable} antialiased overflow-x-hidden`}
-      >
+      <head>
+        {/* Removed theme initialization script */}
+      </head>
+      <body className="antialiased overflow-x-hidden">
+        {/* Removed ThemeProvider */}
         <div className="max-w-[100vw] relative overflow-hidden">
           {children}
         </div>
