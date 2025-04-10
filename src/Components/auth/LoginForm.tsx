@@ -5,6 +5,7 @@ import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { Input } from "@/Components/ui/input";
 import Link from "next/link";
+import { useTheme } from "next-themes";
 
 export default function LoginForm() {
   const router = useRouter();
@@ -12,6 +13,7 @@ export default function LoginForm() {
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
+  const { theme } = useTheme();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -54,13 +56,13 @@ export default function LoginForm() {
   return (
     <div className="w-full max-w-md mx-auto space-y-6 relative z-10">
       <div className="text-center">
-        <h1 className="text-3xl font-bold mb-2">Welcome back</h1>
+        <h1 className="text-3xl font-bold mb-2 text-gray-900 dark:text-white">Welcome back</h1>
         <p className="text-gray-500 dark:text-gray-400">
           Enter your credentials to access your account
         </p>
       </div>
       {error && (
-        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative">
+        <div className="bg-red-100 dark:bg-red-900/30 border border-red-400 dark:border-red-800 text-red-700 dark:text-red-300 px-4 py-3 rounded relative">
           <span className="block sm:inline">{error}</span>
         </div>
       )}
@@ -72,7 +74,7 @@ export default function LoginForm() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
-            className="w-full"
+            className="w-full bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-900 dark:text-gray-100"
             placeholder="you@example.com"
             disabled={isLoading}
           />
@@ -84,7 +86,7 @@ export default function LoginForm() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
-            className="w-full"
+            className="w-full bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-900 dark:text-gray-100"
             placeholder="••••••••"
             disabled={isLoading}
           />
@@ -128,14 +130,14 @@ export default function LoginForm() {
         <div className="mt-6 grid grid-cols-2 gap-3">
           <button
             type="button"
-            className="w-full py-2.5 px-4 border border-gray-300 rounded-md shadow-sm bg-white dark:bg-gray-900 text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800"
+            className="w-full py-2.5 px-4 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm bg-white dark:bg-gray-800 text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700"
             onClick={() => signIn("google", { callbackUrl: "/dashboard" })}
           >
             Google
           </button>
           <button
             type="button"
-            className="w-full py-2.5 px-4 border border-gray-300 rounded-md shadow-sm bg-white dark:bg-gray-900 text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800"
+            className="w-full py-2.5 px-4 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm bg-white dark:bg-gray-800 text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700"
             onClick={() => signIn("github", { callbackUrl: "/dashboard" })}
           >
             GitHub
@@ -143,9 +145,9 @@ export default function LoginForm() {
         </div>
       </form>
       <div className="mt-6 text-center">
-        <Link href="/auth/signup" legacyBehavior>
-          <p className="text-white">If You Dont Have An Account <a className="font-medium text-blue-600 hover:text-blue-500">Sign up</a></p>
-        </Link>
+        <p className="text-gray-700 dark:text-gray-300">
+          If You Don't Have An Account <Link href="/auth/signup" className="font-medium text-blue-600 dark:text-blue-400 hover:text-blue-500 dark:hover:text-blue-300">Sign up</Link>
+        </p>
       </div>
     </div>
   );
