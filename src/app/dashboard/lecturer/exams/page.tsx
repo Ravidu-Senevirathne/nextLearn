@@ -155,10 +155,11 @@ const ExamsPage = () => {
         <div className="container mx-auto px-4 py-8">
             <div className="flex justify-between items-center mb-8">
                 <div>
-                    <h1 className={`text-2xl font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-800'}`}>
+                    <h1 className={`text-2xl font-semibold ${theme === 'dark' ? 'text-gray-100' : 'text-black'}`}>
                         Exams
                     </h1>
-                    <p className={`mt-1 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
+
+                    <p className={`mt-1 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-500'}`}>
                         Create and manage exams for your courses
                     </p>
                 </div>
