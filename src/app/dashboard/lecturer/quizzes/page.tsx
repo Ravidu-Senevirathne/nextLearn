@@ -134,22 +134,22 @@ const QuizzesPage = () => {
 
             {/* Statistics Cards */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-                <div className="bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm">
+                <div className="bg-white text-gray-900 dark:text-gray-300 dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm">
                     <div className="text-gray-500 dark:text-gray-400 text-sm mb-1">Total Quizzes</div>
                     <div className="text-2xl font-semibold">{quizzes.length}</div>
                 </div>
 
-                <div className="bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm">
+                <div className="bg-white text-gray-900 dark:text-gray-300 dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm">
                     <div className="text-gray-500 dark:text-gray-400 text-sm mb-1">Active Quizzes</div>
                     <div className="text-2xl font-semibold">{quizzes.filter(q => q.status === 'active').length}</div>
                 </div>
 
-                <div className="bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm">
+                <div className="bg-white text-gray-900 dark:text-gray-300 dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm">
                     <div className="text-gray-500 dark:text-gray-400 text-sm mb-1">Total Attempts</div>
                     <div className="text-2xl font-semibold">{quizzes.reduce((sum, quiz) => sum + quiz.totalAttempts, 0)}</div>
                 </div>
 
-                <div className="bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm">
+                <div className="bg-white text-gray-900 dark:text-gray-300 dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm">
                     <div className="text-gray-500 dark:text-gray-400 text-sm mb-1">Avg. Score</div>
                     <div className="text-2xl font-semibold">
                         {Math.round(quizzes.reduce((sum, quiz) => sum + quiz.avgScore, 0) / quizzes.length)}%
@@ -221,7 +221,7 @@ const QuizzesPage = () => {
                         <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                             {filteredQuizzes.length > 0 ? (
                                 filteredQuizzes.map((quiz) => (
-                                    <tr key={quiz.id} className="hover:bg-gray-50 dark:hover:bg-gray-750">
+                                    <tr key={quiz.id} className="hover:bg-gray-500 dark:hover:bg-gray-750">
                                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-gray-100">{quiz.title}</td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{quiz.course}</td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{quiz.questions}</td>
