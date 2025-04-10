@@ -1,21 +1,28 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { signIn } from "next-auth/react";
 import { Input } from "@/Components/ui/input";
 import Link from "next/link";
+import { useTheme } from "next-themes";
 
 export default function SignupForm() {
   const router = useRouter();
-  const [name, setName] = useState<string>(""); // Explicit type
-  const [email, setEmail] = useState<string>(""); // Explicit type
-  const [password, setPassword] = useState<string>(""); // Explicit type
-  const [mobile, setMobile] = useState<string>(""); // Explicit type
-  const [confirmPassword, setConfirmPassword] = useState<string>(""); // Explicit type
-  const [role, setRole] = useState<"student" | "lecturer">("student"); // Explicit type
-  const [isLoading, setIsLoading] = useState<boolean>(false); // Explicit type
-  const [error, setError] = useState<string>(""); // Explicit type
+  const [name, setName] = useState<string>("");
+  const [email, setEmail] = useState<string>("");
+  const [password, setPassword] = useState<string>("");
+  const [mobile, setMobile] = useState<string>("");
+  const [confirmPassword, setConfirmPassword] = useState<string>("");
+  const [role, setRole] = useState<"student" | "lecturer">("student");
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string>("");
+  const { theme, resolvedTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -35,7 +42,6 @@ export default function SignupForm() {
         body: JSON.stringify({ name, email, password, mobile, role }),
       });
 
-      // Handle non-OK responses
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
         throw new Error(errorData.message || `Registration failed: ${response.statusText}`);
@@ -43,7 +49,6 @@ export default function SignupForm() {
 
       await response.json();
 
-      // Sign in after registration with redirect:false to prevent automatic redirection
       const result = await signIn("credentials", {
         redirect: false,
         email,
@@ -54,7 +59,6 @@ export default function SignupForm() {
         throw new Error("Sign-in failed after registration: " + result.error);
       }
 
-      // Manually redirect based on role
       router.replace(role === "lecturer" ? "/dashboard/lecturer" : "/dashboard/student");
     } catch (err: any) {
       console.error("Registration error:", err);
@@ -66,21 +70,21 @@ export default function SignupForm() {
   return (
     <div className="w-full max-w-md mx-auto space-y-6 relative z-10">
       <div className="text-center">
-        <h1 className="text-3xl font-bold mb-2">Create an account</h1>
+        <h1 className="text-3xl font-bold mb-2 text-gray-900 dark:text-white">Create an account</h1>
         <p className="text-gray-500 dark:text-gray-400">
           Join NextLearn to start your learning journey
         </p>
       </div>
 
       {error && (
-        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative">
+        <div className="bg-red-100 dark:bg-red-900/30 border border-red-400 dark:border-red-800 text-red-700 dark:text-red-300 px-4 py-3 rounded relative">
           <span className="block sm:inline">{error}</span>
         </div>
       )}
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label className="block text-sm font-medium mb-2">I am a:</label>
+          <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">I am a:</label>
           <div className="flex space-x-2">
             <button
               type="button"
@@ -110,7 +114,7 @@ export default function SignupForm() {
         <div>
           <label
             htmlFor="name"
-            className="block text-sm font-medium mb-1"
+            className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300"
           >
             Full Name
           </label>
@@ -120,16 +124,14 @@ export default function SignupForm() {
             value={name}
             onChange={(e) => setName(e.target.value)}
             required
-            className="w-full"
+            className="w-full bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-900 dark:text-gray-100"
             placeholder="John Doe"
             disabled={isLoading}
           />
         </div>
 
-
-
         <div>
-          <label htmlFor="email" className="block text-sm font-medium mb-1">
+          <label htmlFor="email" className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">
             Email
           </label>
           <Input
@@ -138,15 +140,16 @@ export default function SignupForm() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
-            className="w-full"
+            className="w-full bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-900 dark:text-gray-100"
             placeholder="you@example.com"
             disabled={isLoading}
           />
         </div>
+
         <div>
           <label
             htmlFor="mobile"
-            className="block text-sm font-medium mb-1"
+            className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300"
           >
             Mobile Number
           </label>
@@ -156,14 +159,14 @@ export default function SignupForm() {
             value={mobile}
             onChange={(e) => setMobile(e.target.value)}
             required
-            className="w-full"
+            className="w-full bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-900 dark:text-gray-100"
             placeholder="0720000000"
             disabled={isLoading}
           />
         </div>
 
         <div>
-          <label htmlFor="password" className="block text-sm font-medium mb-1">
+          <label htmlFor="password" className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">
             Password
           </label>
           <Input
@@ -172,14 +175,14 @@ export default function SignupForm() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
-            className="w-full"
+            className="w-full bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-900 dark:text-gray-100"
             placeholder="••••••••"
             disabled={isLoading}
           />
         </div>
 
         <div>
-          <label htmlFor="confirmPassword" className="block text-sm font-medium mb-1">
+          <label htmlFor="confirmPassword" className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">
             Confirm Password
           </label>
           <Input
@@ -188,7 +191,7 @@ export default function SignupForm() {
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
             required
-            className="w-full"
+            className="w-full bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-900 dark:text-gray-100"
             placeholder="••••••••"
             disabled={isLoading}
           />
@@ -232,10 +235,10 @@ export default function SignupForm() {
       <div className="mt-6">
         <div className="relative">
           <div className="absolute inset-0 flex items-center">
-            <div className="w-full border-t border-gray-300"></div>
+            <div className="w-full border-t border-gray-300 dark:border-gray-700"></div>
           </div>
           <div className="relative flex justify-center text-sm">
-            <span className="px-2 bg-white dark:bg-black text-gray-500">
+            <span className="px-2 bg-white dark:bg-gray-900 text-gray-500 dark:text-gray-400">
               Or continue with
             </span>
           </div>
@@ -244,14 +247,14 @@ export default function SignupForm() {
         <div className="mt-6 grid grid-cols-2 gap-3">
           <button
             type="button"
-            className="w-full py-2.5 px-4 border border-gray-300 rounded-md shadow-sm bg-white dark:bg-transparent text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800"
+            className="w-full py-2.5 px-4 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm bg-white dark:bg-gray-800 text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700"
             onClick={() => signIn("google", { callbackUrl: "/dashboard" })}
           >
             Google
           </button>
           <button
             type="button"
-            className="w-full py-2.5 px-4 border border-gray-300 rounded-md shadow-sm bg-white dark:bg-transparent text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800"
+            className="w-full py-2.5 px-4 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm bg-white dark:bg-gray-800 text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700"
             onClick={() => signIn("github", { callbackUrl: "/dashboard" })}
           >
             GitHub
@@ -262,7 +265,7 @@ export default function SignupForm() {
           Already have an account?{" "}
           <Link
             href="/auth/login"
-            className="font-medium text-blue-600 hover:text-blue-500"
+            className="font-medium text-blue-600 dark:text-blue-400 hover:text-blue-500 dark:hover:text-blue-300"
           >
             Sign in
           </Link>

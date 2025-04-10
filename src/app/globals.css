@@ -27,6 +27,17 @@
   --card-background: #ffffff;
   --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
 }
+@media (prefers-color-scheme: light) {
+  :root {
+    --background: #ffffff;
+    --foreground: #171717;
+    --bp-chat-bubble-bg: #4f46e5;
+    --bp-chat-bubble-color: white;
+    --bp-chat-container-bg: white;
+    --bp-chat-header-bg: #3b82f6;
+  }
+}
+
 
 @media (prefers-color-scheme: dark) {
   :root {

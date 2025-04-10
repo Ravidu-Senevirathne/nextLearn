@@ -90,24 +90,24 @@ export default function CreateAssignmentPage() {
     };
 
     return (
-        <div className="p-6">
+        <div className="p-6 bg-white dark:bg-gray-900">
             <div className="mb-6">
                 <Link
                     href="/dashboard/lecturer/assignments"
-                    className="text-gray-600 hover:text-teal-700 flex items-center"
+                    className="text-gray-600 dark:text-gray-300 hover:text-teal-700 dark:hover:text-teal-500 flex items-center"
                 >
                     <ArrowLeft size={16} className="mr-2" />
                     Back to Assignments
                 </Link>
             </div>
 
-            <h1 className="text-3xl font-bold text-slate-800 mb-6">Create New Assignment</h1>
+            <h1 className="text-3xl font-bold text-gray-800 dark:text-amber-50 mb-6">Create New Assignment</h1>
 
-            <div className="bg-white rounded-lg shadow-sm p-6">
+            <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-800 dark:text-gray-200 rounded-lg shadow-sm p-6">
                 <form onSubmit={handleSubmit}>
                     <div className="grid grid-cols-1 gap-6">
                         <div>
-                            <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-1">
+                            <label htmlFor="title" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                 Assignment Title*
                             </label>
                             <input
@@ -116,8 +116,7 @@ export default function CreateAssignmentPage() {
                                 name="title"
                                 value={formData.title}
                                 onChange={handleChange}
-                                className={`w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 ${formErrors.title ? 'border-red-500' : 'border-gray-300'
-                                    }`}
+                                className={`w-full px-4 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white border rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 ${formErrors.title ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'}`}
                                 placeholder="Enter assignment title"
                             />
                             {formErrors.title && (
@@ -126,7 +125,7 @@ export default function CreateAssignmentPage() {
                         </div>
 
                         <div>
-                            <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
+                            <label htmlFor="description" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                 Description*
                             </label>
                             <textarea
@@ -135,8 +134,7 @@ export default function CreateAssignmentPage() {
                                 value={formData.description}
                                 onChange={handleChange}
                                 rows={5}
-                                className={`w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 ${formErrors.description ? 'border-red-500' : 'border-gray-300'
-                                    }`}
+                                className={`w-full px-4 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white border rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 ${formErrors.description ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'}`}
                                 placeholder="Enter assignment description, instructions, and requirements"
                             ></textarea>
                             {formErrors.description && (
@@ -145,7 +143,7 @@ export default function CreateAssignmentPage() {
                         </div>
 
                         <div>
-                            <label htmlFor="courseId" className="block text-sm font-medium text-gray-700 mb-1">
+                            <label htmlFor="courseId" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                 Course*
                             </label>
                             <select
@@ -153,8 +151,7 @@ export default function CreateAssignmentPage() {
                                 name="courseId"
                                 value={formData.courseId}
                                 onChange={handleChange}
-                                className={`w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 ${formErrors.courseId ? 'border-red-500' : 'border-gray-300'
-                                    }`}
+                                className={`w-full px-4 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white border rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 ${formErrors.courseId ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'}`}
                             >
                                 <option value="">Select a course</option>
                                 {courses.map(course => (
@@ -168,7 +165,7 @@ export default function CreateAssignmentPage() {
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
-                                <label htmlFor="dueDate" className="block text-sm font-medium text-gray-700 mb-1">
+                                <label htmlFor="dueDate" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                     Due Date*
                                 </label>
                                 <div className="relative">
@@ -179,8 +176,7 @@ export default function CreateAssignmentPage() {
                                         name="dueDate"
                                         value={formData.dueDate}
                                         onChange={handleChange}
-                                        className={`w-full pl-10 pr-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 ${formErrors.dueDate ? 'border-red-500' : 'border-gray-300'
-                                            }`}
+                                        className={`w-full pl-10 pr-4 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white border rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 ${formErrors.dueDate ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'}`}
                                     />
                                 </div>
                                 {formErrors.dueDate && (
@@ -189,7 +185,7 @@ export default function CreateAssignmentPage() {
                             </div>
 
                             <div>
-                                <label htmlFor="dueTime" className="block text-sm font-medium text-gray-700 mb-1">
+                                <label htmlFor="dueTime" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                     Due Time*
                                 </label>
                                 <div className="relative">
@@ -200,8 +196,7 @@ export default function CreateAssignmentPage() {
                                         name="dueTime"
                                         value={formData.dueTime}
                                         onChange={handleChange}
-                                        className={`w-full pl-10 pr-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 ${formErrors.dueTime ? 'border-red-500' : 'border-gray-300'
-                                            }`}
+                                        className={`w-full pl-10 pr-4 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white border rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 ${formErrors.dueTime ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'}`}
                                     />
                                 </div>
                                 {formErrors.dueTime && (
@@ -211,7 +206,7 @@ export default function CreateAssignmentPage() {
                         </div>
 
                         <div>
-                            <label htmlFor="totalPoints" className="block text-sm font-medium text-gray-700 mb-1">
+                            <label htmlFor="totalPoints" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                 Total Points
                             </label>
                             <input
@@ -221,25 +216,25 @@ export default function CreateAssignmentPage() {
                                 value={formData.totalPoints}
                                 onChange={handleChange}
                                 min="0"
-                                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500"
+                                className="w-full px-4 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500"
                             />
                         </div>
 
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-3">
+                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
                                 Attachments
                             </label>
                             <div className="flex items-center justify-center w-full">
                                 <label
                                     htmlFor="file-upload"
-                                    className="flex flex-col items-center justify-center w-full h-32 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100"
+                                    className="flex flex-col items-center justify-center w-full h-32 border-2 border-gray-300 dark:border-gray-600 border-dashed rounded-lg cursor-pointer bg-gray-50 dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600"
                                 >
                                     <div className="flex flex-col items-center justify-center pt-5 pb-6">
                                         <Upload size={24} className="text-gray-400 mb-2" />
-                                        <p className="mb-1 text-sm text-gray-500">
+                                        <p className="mb-1 text-sm text-gray-500 dark:text-gray-400">
                                             <span className="font-semibold">Click to upload</span> or drag and drop
                                         </p>
-                                        <p className="text-xs text-gray-500">PDF, DOCX, or image files (max 10MB)</p>
+                                        <p className="text-xs text-gray-500 dark:text-gray-400">PDF, DOCX, or image files (max 10MB)</p>
                                     </div>
                                     <input
                                         id="file-upload"
@@ -253,11 +248,11 @@ export default function CreateAssignmentPage() {
 
                             {formData.attachments.length > 0 && (
                                 <div className="mt-4">
-                                    <h4 className="text-sm font-medium text-gray-700 mb-2">Attached Files:</h4>
+                                    <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Attached Files:</h4>
                                     <ul className="space-y-2">
                                         {formData.attachments.map((file, index) => (
-                                            <li key={index} className="flex items-center justify-between bg-gray-50 p-2 rounded-md">
-                                                <span className="text-sm truncate max-w-xs">{file.name}</span>
+                                            <li key={index} className="flex items-center justify-between bg-gray-50 dark:bg-gray-700 p-2 rounded-md">
+                                                <span className="text-sm text-gray-800 dark:text-gray-200 truncate max-w-xs">{file.name}</span>
                                                 <button
                                                     type="button"
                                                     onClick={() => removeAttachment(index)}
@@ -272,10 +267,10 @@ export default function CreateAssignmentPage() {
                             )}
                         </div>
 
-                        <div className="border-t pt-6 flex justify-end space-x-4">
+                        <div className="border-t border-gray-200 dark:border-gray-700 pt-6 flex justify-end space-x-4">
                             <Link
                                 href="/dashboard/lecturer/assignments"
-                                className="px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50"
+                                className="px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-50 dark:hover:bg-gray-800"
                             >
                                 Cancel
                             </Link>
