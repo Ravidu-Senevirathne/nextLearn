@@ -30,9 +30,10 @@ export interface Quiz {
     title: string;
     course: string;
     dueDate: string;
-    status: 'pending' | 'completed';
-    score?: string;
     questions: number;
+    duration?: string;
+    status: 'pending' | 'completed' | 'expired';
+    score?: string;
 }
 
 export interface Notification {
