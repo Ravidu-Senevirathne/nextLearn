@@ -160,13 +160,13 @@ export default function CreateLessonPage() {
                                 value={courseId}
                                 onChange={(e) => setCourseId(e.target.value)}
                                 className={`w-full px-3 py-2 rounded-md border ${errors.courseId ? 'border-red-500' :
-                                    theme === 'dark' ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'
+                                    theme === 'dark' ? 'bg-gray-700 border-gray-600 text-white' : 'bg-gray-500 border-gray-300 text-gray-900'
                                     } focus:outline-none focus:ring-2 ${theme === 'dark' ? 'focus:ring-blue-500' : 'focus:ring-teal-500'
-                                    }`}
+                                    } [&>option]:text-black [&>option]:bg-white ${theme === 'dark' && '[&>option]:bg-gray-700 [&>option]:text-black'}`}
                             >
                                 <option value="">Select a course</option>
                                 {courses.map((course) => (
-                                    <option key={course.id} value={course.id}>
+                                    <option  className='bg-gray-500 text-black' key={course.id} value={course.id}>
                                         {course.title}
                                     </option>
                                 ))}
