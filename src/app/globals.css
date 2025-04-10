@@ -1,13 +1,19 @@
 @import "tailwindcss";
 
-@theme {
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+@tailwind base;
 
 :root {
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
   --background: #ffffff;
   --foreground: #171717;
+  --shadow-input: 0px 2px 3px -1px rgba(0, 0, 0, 0.1),
+    0px 1px 0px 0px rgba(25, 28, 33, 0.02),
+    0px 0px 0px 1px rgba(25, 28, 33, 0.08);
+  --bp-chat-bubble-bg: #4f46e5;
+  --bp-chat-bubble-color: white;
+  --bp-chat-container-bg: white;
+  --bp-chat-header-bg: #3b82f6;
 }
 
 [data-theme="light"] {
@@ -26,6 +32,10 @@
   :root {
     --background: #0a0a0a;
     --foreground: #ededed;
+    --bp-chat-bubble-bg: #3b82f6;
+    --bp-chat-bubble-color: white;
+    --bp-chat-container-bg: #1f2937;
+    --bp-chat-header-bg: #111827;
   }
 }
 
@@ -71,14 +81,6 @@ body {
 .bg-gradient-conic {
   background-image: conic-gradient(var(--tw-gradient-stops));
 }
-
-@theme inline {
-  --shadow-input: 0px 2px 3px -1px rgba(0, 0, 0, 0.1),
-    0px 1px 0px 0px rgba(25, 28, 33, 0.02),
-    0px 0px 0px 1px rgba(25, 28, 33, 0.08);
-}
-
-/* Add these new styles to your existing globals.css */
 
 /* Animation pausing for performance */
 .paused {
@@ -131,12 +133,6 @@ img.blur-up {
 
 img.blur-up.lazyloaded {
   filter: blur(0);
-}
-
-@import "tailwindcss";
-
-@theme inline {
-  --animate-spotlight: spotlight 2s ease 0.75s 1 forwards;
 }
 
 @keyframes spotlight {
@@ -269,5 +265,16 @@ input:focus {
 button:hover {
   transform: scale(1.05);
   transition: transform 0.3s ease-in-out;
+}
+
+/* Botpress Webchat Custom Styles */
+.bp-widget-web {
+  z-index: 1000 !important;
+}
+
+/* Make sure the chat button matches our theme */
+.bp-widget-button {
+  background: linear-gradient(to right, #3b82f6, #8b5cf6) !important;
+  box-shadow: 0 4px 14px 0 rgba(59, 130, 246, 0.4) !important;
 }
 

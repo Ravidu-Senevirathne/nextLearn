@@ -3,7 +3,7 @@
 import { signOut } from "next-auth/react";
 import { useState } from "react";
 import { Button } from "@/Components/ui/button";
-import { LogOut } from "lucide-react";
+import { LogOut, Loader2 } from "lucide-react";
 
 interface LogoutButtonProps {
     className?: string;
@@ -32,10 +32,19 @@ export default function LogoutButton({ className, variant = "default", size = "d
             size={size}
             onClick={handleLogout}
             disabled={isLoading}
-            className={`bg-transparent hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300 w-full flex items-center ${className}`}
+            className={`bg-transparent hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300 w-full flex items-center min-h-[40px] md:min-h-[44px] ${className}`}
         >
-            <LogOut size={16} className="mr-2" />
-            {isLoading ? "Logging out..." : "Logout"}
+            {isLoading ? (
+                <>
+                    <Loader2 size={16} className="mr-2 animate-spin" />
+                    <span className="hidden sm:inline">Logging out...</span>
+                </>
+            ) : (
+                <>
+                    <LogOut size={16} className="mr-2" />
+                    <span className="hidden sm:inline">Logout</span>
+                </>
+            )}
         </Button>
     );
 }

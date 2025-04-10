@@ -1,6 +1,9 @@
 import type { Metadata } from "next";
+import { Inter } from "next/font/google";
 import "./globals.css";
-import { geist, geistMono, inter } from "./fonts";
+import ChatbotWrapper from "@/Components/ChatbotWrapper";
+
+const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "NextLearn",
@@ -14,14 +17,11 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <head>
-        {/* Removed theme initialization script */}
-      </head>
-      <body className="antialiased overflow-x-hidden">
-        {/* Removed ThemeProvider */}
-        <div className="max-w-[100vw] relative overflow-hidden">
+      <body className={inter.className}>
+        <div className="min-h-screen">
           {children}
         </div>
+        <ChatbotWrapper />
       </body>
     </html>
   );

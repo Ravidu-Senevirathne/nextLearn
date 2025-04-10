@@ -12,6 +12,7 @@
     "deploy": "npm run build && npm run start"
   },
   "dependencies": {
+    "@botpress/webchat": "2.3",
     "@radix-ui/react-label": "^2.1.2",
     "@tabler/icons-react": "^3.31.0",
     "caniuse-lite": "^1.0.30001707",

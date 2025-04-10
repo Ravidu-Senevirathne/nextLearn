@@ -29,7 +29,7 @@ const CourseCreatePage = () => {
         level: 'Beginner',
         duration: '',
         price: '',
-        image: null,
+        image: undefined,
         previewImage: null,
         topics: [''],
         features: [''],
@@ -85,7 +85,7 @@ const CourseCreatePage = () => {
 
             setFormData({
                 ...formData,
-                image: file,
+                image: e.target.files?.[0] || undefined,
                 previewImage: previewUrl
             });
 
@@ -385,7 +385,7 @@ const CourseCreatePage = () => {
                                         </div>
                                         <button
                                             type="button"
-                                            onClick={() => setFormData({ ...formData, image: null, previewImage: null })}
+                                            onClick={() => setFormData({ ...formData, image: undefined, previewImage: null })}
                                             className="absolute top-2 right-2 p-1 bg-gray-900 bg-opacity-75 rounded-full text-white"
                                         >
                                             <X size={16} />
