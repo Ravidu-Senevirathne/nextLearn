@@ -224,6 +224,14 @@ const Sidebar: React.FC<SidebarProps> = ({ sidebarOpen, toggleSidebar, theme }) 
                 </div>
 
                 <Link
+                    href="/dashboard/lecturer/students"
+                    className={getLinkClasses()}
+                >
+                    <User size={sidebarOpen ? 18 : 20} className="min-w-5" />
+                    {sidebarOpen && <span className="ml-3">Students</span>}
+                </Link>
+
+                <Link
                     href="/dashboard/lecturer/calendar"
                     className={getLinkClasses()}
                 >
