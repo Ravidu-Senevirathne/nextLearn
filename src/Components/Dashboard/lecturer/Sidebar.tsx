@@ -183,13 +183,45 @@ const Sidebar: React.FC<SidebarProps> = ({ sidebarOpen, toggleSidebar, theme }) 
                 </div>
 
                 {/* More navigation links */}
-                <Link
-                    href="/dashboard/lecturer/students"
-                    className={getLinkClasses()}
-                >
-                    <Users size={sidebarOpen ? 18 : 20} className="min-w-5" />
-                    {sidebarOpen && <span className="ml-3">Students</span>}
-                </Link>
+                <div>
+                    <button
+                        onClick={() => toggleDropdown('students')}
+                        className={getDropdownClasses()}
+                    >
+                        <div className="flex items-center">
+                            <Users size={sidebarOpen ? 18 : 20} className="min-w-5" />
+                            {sidebarOpen && <span className="ml-3">Students</span>}
+                        </div>
+                        {sidebarOpen && (
+                            <ChevronDown
+                                size={16}
+                                className={`transition-transform ${activeDropdown === 'students' ? 'rotate-180' : ''}`}
+                            />
+                        )}
+                    </button>
+                    {sidebarOpen && activeDropdown === 'students' && (
+                        <div className="ml-6 mt-1 space-y-1">
+                            <Link
+                                href="/dashboard/lecturer/students"
+                                className={getSubLinkClasses()}
+                            >
+                                All Students
+                            </Link>
+                            <Link
+                                href="/dashboard/lecturer/students/groups"
+                                className={getSubLinkClasses()}
+                            >
+                                Student Groups
+                            </Link>
+                            <Link
+                                href="/dashboard/lecturer/students/enrollments"
+                                className={getSubLinkClasses()}
+                            >
+                                Enrollments
+                            </Link>
+                        </div>
+                    )}
+                </div>
 
                 <Link
                     href="/dashboard/lecturer/calendar"
