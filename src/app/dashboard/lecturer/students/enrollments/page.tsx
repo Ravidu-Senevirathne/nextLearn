@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/Components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/Components/ui/card";
 import {
@@ -72,6 +72,79 @@ const formSchema = z.object({
 // Define the type for form data
 type FormData = z.infer<typeof formSchema>;
 
+// Define a proper type for the enrollment objects
+type Enrollment = {
+    id: number;
+    student: string;
+    course: string;
+    status: string;
+    enrollmentDate: Date;
+    progress: number;
+    [key: string]: any; // This allows string indexing
+};
+
+// Mock data for enrollments
+const mockEnrollments = [
+    {
+        id: 1,
+        student: "John Doe",
+        course: "Introduction to Web Development",
+        status: "Active",
+        enrollmentDate: new Date(2023, 6, 15),
+        progress: 45,
+    },
+    {
+        id: 2,
+        student: "Jane Smith",
+        course: "Advanced JavaScript",
+        status: "Active",
+        enrollmentDate: new Date(2023, 7, 20),
+        progress: 78,
+    },
+    {
+        id: 3,
+        student: "Bob Johnson",
+        course: "React Fundamentals",
+        status: "Completed",
+        enrollmentDate: new Date(2023, 5, 10),
+        progress: 100,
+    },
+    {
+        id: 4,
+        student: "Alice Williams",
+        course: "Database Design",
+        status: "Inactive",
+        enrollmentDate: new Date(2023, 8, 5),
+        progress: 12,
+    },
+    {
+        id: 5,
+        student: "Charlie Brown",
+        course: "UI/UX Design Principles",
+        status: "Active",
+        enrollmentDate: new Date(2023, 7, 25),
+        progress: 67,
+    },
+];
+
+// Mock data for students
+const mockStudents = [
+    { id: "1", name: "John Doe" },
+    { id: "2", name: "Jane Smith" },
+    { id: "3", name: "Bob Johnson" },
+    { id: "4", name: "Alice Williams" },
+    { id: "5", name: "Charlie Brown" },
+];
+
+// Mock data for courses
+const mockCourses = [
+    { id: "1", title: "Introduction to Web Development" },
+    { id: "2", title: "Advanced JavaScript" },
+    { id: "3", title: "React Fundamentals" },
+    { id: "4", title: "Database Design" },
+    { id: "5", title: "UI/UX Design Principles" },
+];
+
 export default function EnrollmentsPage() {
     const { theme } = useTheme();
     const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -80,6 +153,8 @@ export default function EnrollmentsPage() {
     const [selectedStatus, setSelectedStatus] = useState('All Statuses');
     const [sortField, setSortField] = useState('student');
     const [sortDirection, setSortDirection] = useState('asc');
+    const [filteredEnrollments, setFilteredEnrollments] = useState<Enrollment[]>([]);
+    const [enrollments] = useState(mockEnrollments);
 
     // Theme-based styling functions
     const getCardStyle = () => {
@@ -162,67 +237,6 @@ export default function EnrollmentsPage() {
         },
     });
 
-    // Mock data for the table
-    const enrollments = [
-        {
-            id: 1,
-            student: "John Doe",
-            course: "Introduction to Web Development",
-            status: "Active",
-            enrollmentDate: new Date(2023, 6, 15),
-            progress: 45,
-        },
-        {
-            id: 2,
-            student: "Jane Smith",
-            course: "Advanced JavaScript",
-            status: "Active",
-            enrollmentDate: new Date(2023, 7, 20),
-            progress: 78,
-        },
-        {
-            id: 3,
-            student: "Bob Johnson",
-            course: "React Fundamentals",
-            status: "Completed",
-            enrollmentDate: new Date(2023, 5, 10),
-            progress: 100,
-        },
-        {
-            id: 4,
-            student: "Alice Williams",
-            course: "Database Design",
-            status: "Inactive",
-            enrollmentDate: new Date(2023, 8, 5),
-            progress: 12,
-        },
-        {
-            id: 5,
-            student: "Charlie Brown",
-            course: "UI/UX Design Principles",
-            status: "Active",
-            enrollmentDate: new Date(2023, 7, 25),
-            progress: 67,
-        },
-    ];
-
-    // Mock data for dropdowns
-    const mockStudents = [
-        { id: "1", name: "John Doe" },
-        { id: "2", name: "Jane Smith" },
-        { id: "3", name: "Bob Johnson" },
-        { id: "4", name: "Alice Williams" },
-        { id: "5", name: "Charlie Brown" },
-    ];
-
-    const mockCourses = [
-        { id: "1", title: "Introduction to Web Development" },
-        { id: "2", title: "Advanced JavaScript" },
-        { id: "3", title: "React Fundamentals" },
-        { id: "4", title: "Database Design" },
-        { id: "5", title: "UI/UX Design Principles" },
-    ];
-
     // Handle form submission
     const onSubmit = (values: FormData) => {
         console.log(values);
@@ -231,13 +245,66 @@ export default function EnrollmentsPage() {
         // Here you would typically send the data to your backend
     };
 
-    // Filter enrollments based on search query
-    const filteredEnrollments = enrollments.filter(
-        (enrollment) =>
-            enrollment.student.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            enrollment.course.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            enrollment.status.toLowerCase().includes(searchQuery.toLowerCase())
-    );
+    // Apply filters and sorting to the enrollments data
+    useEffect(() => {
+        let result = [...enrollments] as Enrollment[];
+
+        // Apply search filter
+        if (searchQuery) {
+            result = result.filter(
+                (enrollment) =>
+                    enrollment.student.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                    enrollment.course.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                    enrollment.status.toLowerCase().includes(searchQuery.toLowerCase())
+            );
+        }
+
+        // Apply course filter
+        if (selectedCategory !== 'All Courses') {
+            const selectedCourse = mockCourses.find(course => course.id === selectedCategory)?.title;
+            if (selectedCourse) {
+                result = result.filter(enrollment => enrollment.course === selectedCourse);
+            }
+        }
+
+        // Apply status filter
+        if (selectedStatus !== 'All Statuses') {
+            result = result.filter(enrollment => enrollment.status === selectedStatus);
+        }
+
+        // Apply sorting
+        result.sort((a, b) => {
+            // Handle each property specifically to avoid type errors
+            if (sortField === 'student') {
+                return sortDirection === 'asc'
+                    ? a.student.localeCompare(b.student)
+                    : b.student.localeCompare(a.student);
+            }
+            else if (sortField === 'course') {
+                return sortDirection === 'asc'
+                    ? a.course.localeCompare(b.course)
+                    : b.course.localeCompare(a.course);
+            }
+            else if (sortField === 'status') {
+                return sortDirection === 'asc'
+                    ? a.status.localeCompare(b.status)
+                    : b.status.localeCompare(a.status);
+            }
+            else if (sortField === 'enrollmentDate') {
+                return sortDirection === 'asc'
+                    ? a.enrollmentDate.getTime() - b.enrollmentDate.getTime()
+                    : b.enrollmentDate.getTime() - a.enrollmentDate.getTime();
+            }
+            else if (sortField === 'progress') {
+                return sortDirection === 'asc'
+                    ? a.progress - b.progress
+                    : b.progress - a.progress;
+            }
+            return 0;
+        });
+
+        setFilteredEnrollments(result);
+    }, [searchQuery, selectedCategory, selectedStatus, sortField, sortDirection]);
 
     return (
         <div className={`p-6 ${theme === 'dark' ? 'text-white' : 'text-gray-800'}`}>
