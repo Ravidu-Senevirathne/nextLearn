@@ -1,0 +1,291 @@
+@import "tailwindcss";
+
+@tailwind base;
+
+:root {
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+  --background: #ffffff;
+  --foreground: #171717;
+  --shadow-input: 0px 2px 3px -1px rgba(0, 0, 0, 0.1),
+    0px 1px 0px 0px rgba(25, 28, 33, 0.02),
+    0px 0px 0px 1px rgba(25, 28, 33, 0.08);
+  --bp-chat-bubble-bg: #4f46e5;
+  --bp-chat-bubble-color: white;
+  --bp-chat-container-bg: white;
+  --bp-chat-header-bg: #3b82f6;
+}
+
+[data-theme="light"] {
+  --background: #f9f9f9;
+  --foreground: #333333;
+  --primary: #6366f1; /* Example: Indigo-500 */
+  --secondary: #3b82f6; /* Example: Blue-500 */
+  --accent: #10b981; /* Example: Emerald-500 */
+  --text-muted: #6b7280; /* Example: Gray-500 */
+  --border-color: #d1d5db; /* Example: Gray-300 */
+  --card-background: #ffffff;
+  --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+@media (prefers-color-scheme: light) {
+  :root {
+    --background: #ffffff;
+    --foreground: #171717;
+    --bp-chat-bubble-bg: #4f46e5;
+    --bp-chat-bubble-color: white;
+    --bp-chat-container-bg: white;
+    --bp-chat-header-bg: #3b82f6;
+  }
+}
+
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+    --bp-chat-bubble-bg: #3b82f6;
+    --bp-chat-bubble-color: white;
+    --bp-chat-container-bg: #1f2937;
+    --bp-chat-header-bg: #111827;
+  }
+}
+
+body {
+  color: var(--foreground);
+  background: var(--background);
+  font-family: Arial, Helvetica, sans-serif;
+  overflow-x: hidden; /* Prevent horizontal scrolling */
+  transition: background-color 0.3s, color 0.3s;
+}
+
+/* Glowing Effect Styles */
+.glow {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+/* Add these styles to your global CSS */
+@keyframes spin-slow {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-spin-slow {
+  animation: spin-slow 10s linear infinite;
+}
+
+.mask-gradient {
+  mask-image: linear-gradient(#fff 0 0), linear-gradient(#fff 0 0);
+  mask-composite: xor;
+  mask-clip: padding-box, border-box;
+}
+
+.perspective-effect {
+  perspective: 1000px;
+}
+
+.bg-gradient-conic {
+  background-image: conic-gradient(var(--tw-gradient-stops));
+}
+
+/* Animation pausing for performance */
+.paused {
+  animation-play-state: paused !important;
+}
+
+/* Loading spinner animation */
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+/* Progress bar animation */
+@keyframes indeterminate {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+.indeterminate-progress {
+  animation: indeterminate 1.5s infinite cubic-bezier(0.65, 0.815, 0.735, 0.395);
+}
+
+/* Image loading animation */
+.img-loading-placeholder {
+  background: linear-gradient(110deg, #ececec 8%, #f5f5f5 18%, #ececec 33%);
+  background-size: 200% 100%;
+  animation: shine 1.5s infinite linear;
+}
+
+@keyframes shine {
+  to {
+    background-position-x: -200%;
+  }
+}
+
+/* Add this to existing styles */
+img.blur-up {
+  filter: blur(5px);
+  transition: filter 0.4s ease-in-out;
+}
+
+img.blur-up.lazyloaded {
+  filter: blur(0);
+}
+
+@keyframes spotlight {
+  0% {
+    opacity: 0;
+    transform: translate(-72%, -62%) scale(0.5);
+  }
+  100% {
+    opacity: 1;
+    transform: translate(-50%, -40%) scale(1);
+  }
+}
+
+.animate-spotlight {
+  animation: spotlight 2s ease 0.75s 1 forwards;
+}
+
+/* Fix for button click issues */
+button,
+a,
+input,
+select,
+textarea {
+  position: relative;
+  z-index: 1;
+}
+
+.pointer-events-auto {
+  pointer-events: auto !important;
+}
+
+/* Input and button focus/hover enhancements */
+button {
+  pointer-events: auto !important;
+  cursor: pointer;
+  position: relative;
+}
+
+input:focus {
+  border-color: rgba(99, 102, 241, 0.4) !important;
+  box-shadow: 0 0 0 1px rgba(99, 102, 241, 0.1),
+    0 0 0 3px rgba(99, 102, 241, 0.1);
+}
+
+/* Ensure proper stacking for interactive elements */
+.pointer-events-auto {
+  pointer-events: auto !important;
+}
+
+.form-element-container {
+  position: relative;
+  z-index: 1;
+}
+
+/* Enhanced styles for signup page */
+.input-container {
+  position: relative;
+  margin-bottom: 1rem;
+}
+
+.social-buttons {
+  position: relative;
+}
+
+.social-btn {
+  position: relative;
+  z-index: 50 !important;
+  cursor: pointer !important;
+}
+
+button:hover,
+a:hover {
+  cursor: pointer;
+}
+
+/* Fix for button and input styling */
+input {
+  font-size: 1rem;
+}
+
+button,
+input[type="submit"] {
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+/* Make sure z-index is properly handled */
+.z-above {
+  z-index: 100 !important;
+}
+
+/* Animations */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(50px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fade-in 1s ease-out;
+}
+
+.animate-slide-up {
+  animation: slide-up 1s ease-out;
+}
+
+/* Enhanced glowing effect */
+input:focus {
+  border-color: rgba(99, 102, 241, 0.4) !important;
+  box-shadow: 0 0 10px rgba(99, 102, 241, 0.6);
+}
+
+/* Button hover effects */
+button:hover {
+  transform: scale(1.05);
+  transition: transform 0.3s ease-in-out;
+}
+
+/* Botpress Webchat Custom Styles */
+.bp-widget-web {
+  z-index: 1000 !important;
+}
+
+/* Make sure the chat button matches our theme */
+.bp-widget-button {
+  background: linear-gradient(to right, #3b82f6, #8b5cf6) !important;
+  box-shadow: 0 4px 14px 0 rgba(59, 130, 246, 0.4) !important;
+}
+
