@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState } from 'react';
-import StudentDashboardLayout from '@/Components/Dashboard/student/Layout';
 import { BookOpen, Video, FileText, Download, CheckCircle, Lock, Play } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -161,16 +160,16 @@ const getTotalLessonsCount = (sections: Section[]) => {
 
 const CoursePage = () => {
   const [activeTab, setActiveTab] = useState<'content' | 'materials'>('content');
-  
+
   // In a real app, you would fetch the course by ID from an API
   const course = courseData;
-  
+
   const completedLessons = getCompletedLessonsCount(course.sections);
   const totalLessons = getTotalLessonsCount(course.sections);
   const progressPercentage = Math.round((completedLessons / totalLessons) * 100);
 
   const getLessonIcon = (type: string) => {
-    switch(type) {
+    switch (type) {
       case 'video': return <Video size={16} />;
       case 'reading': return <FileText size={16} />;
       case 'quiz': return <CheckCircle size={16} />;
@@ -179,7 +178,7 @@ const CoursePage = () => {
   };
 
   return (
-    <StudentDashboardLayout title={course.title}>
+    <>
       {/* Course Header */}
       <div className="mb-8">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -203,8 +202,8 @@ const CoursePage = () => {
             </div>
           </div>
           <div className="relative h-48 md:h-auto rounded-lg overflow-hidden">
-            <Image 
-              src={course.image || '/images/course-placeholder.jpg'} 
+            <Image
+              src={course.image || '/images/course-placeholder.jpg'}
               alt={course.title}
               fill
               className="object-cover"
@@ -232,21 +231,19 @@ const CoursePage = () => {
         <div className="flex space-x-4">
           <button
             onClick={() => setActiveTab('content')}
-            className={`py-3 px-4 border-b-2 ${
-              activeTab === 'content' 
+            className={`py-3 px-4 border-b-2 ${activeTab === 'content'
                 ? 'border-blue-500 text-blue-400'
                 : 'border-transparent text-gray-400 hover:text-gray-300'
-            }`}
+              }`}
           >
             Course Content
           </button>
           <button
             onClick={() => setActiveTab('materials')}
-            className={`py-3 px-4 border-b-2 ${
-              activeTab === 'materials' 
+            className={`py-3 px-4 border-b-2 ${activeTab === 'materials'
                 ? 'border-blue-500 text-blue-400'
                 : 'border-transparent text-gray-400 hover:text-gray-300'
-            }`}
+              }`}
           >
             Course Materials
           </button>
@@ -266,11 +263,10 @@ const CoursePage = () => {
                   <div key={lesson.id} className="p-4 hover:bg-gray-800/50 transition-colors">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center">
-                        <div className={`w-8 h-8 rounded-full flex items-center justify-center mr-3 ${
-                          lesson.completed 
-                            ? 'bg-green-900/40 text-green-400' 
+                        <div className={`w-8 h-8 rounded-full flex items-center justify-center mr-3 ${lesson.completed
+                            ? 'bg-green-900/40 text-green-400'
                             : 'bg-gray-800 text-gray-400'
-                        }`}>
+                          }`}>
                           {lesson.completed ? <CheckCircle size={16} /> : getLessonIcon(lesson.type)}
                         </div>
                         <div>
@@ -329,7 +325,7 @@ const CoursePage = () => {
           </div>
         </div>
       )}
-    </StudentDashboardLayout>
+    </>
   );
 };
 
