@@ -2,7 +2,6 @@
 
 import React from 'react';
 import { BookOpen, Clock, Award, BarChart2, Download, Calendar } from 'lucide-react';
-import StudentDashboardLayout from '@/Components/Dashboard/student/Layout';
 import StatCard from '@/Components/Dashboard/student/StatCard';
 import CourseCard from '@/Components/Dashboard/student/CourseCard';
 import AssignmentsList from '@/Components/Dashboard/student/AssignmentsList';
@@ -150,7 +149,7 @@ const notifications: Notification[] = [
 
 const StudentDashboard = () => {
   return (
-    <StudentDashboardLayout>
+    <>
       {/* Welcome section */}
       <section className="mb-8">
         <h2 className="text-2xl font-bold mb-1">Welcome back, Alex!</h2>
@@ -231,7 +230,7 @@ const StudentDashboard = () => {
           </Link>
         </div>
       </section>
-    </StudentDashboardLayout>
+    </>
   );
 };
 

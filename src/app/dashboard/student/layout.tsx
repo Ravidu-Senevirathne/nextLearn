@@ -1,8 +1,11 @@
+import React from 'react';
+import { ThemeProvider } from '@/hooks/useTheme';
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { redirect } from "next/navigation";
+import StudentDashboardLayout from '@/Components/Dashboard/student/Layout';
 
-export default async function StudentDashboardLayout({
+export default async function StudentLayout({
     children,
 }: {
     children: React.ReactNode;
@@ -15,6 +18,9 @@ export default async function StudentDashboardLayout({
         redirect("/auth/login");
     }
 
-    // Return children directly without wrapper divs that create extra scrollable containers
-    return children;
+    return (
+        <ThemeProvider>
+            <StudentDashboardLayout>{children}</StudentDashboardLayout>
+        </ThemeProvider>
+    );
 }

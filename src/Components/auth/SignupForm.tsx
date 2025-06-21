@@ -59,7 +59,11 @@ export default function SignupForm() {
         throw new Error("Sign-in failed after registration: " + result.error);
       }
 
-      router.replace(role === "lecturer" ? "/dashboard/lecturer" : "/dashboard/student");
+      router.replace(
+        role === "lecturer"
+          ? "/dashboard/lecturer"
+          : "/dashboard/student"
+      );
     } catch (err: any) {
       console.error("Registration error:", err);
       setError(err.message || "Something went wrong during registration");
@@ -108,6 +112,7 @@ export default function SignupForm() {
             >
               Lecturer
             </button>
+        
           </div>
         </div>
 
@@ -274,3 +279,4 @@ export default function SignupForm() {
     </div>
   );
 }
+  
