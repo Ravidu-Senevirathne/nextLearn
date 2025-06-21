@@ -13,14 +13,19 @@ export default withAuth(
 
         // If user is not logged in, they'll be redirected to login page by withAuth
 
+        // If path starts with /dashboard/admin but user is not an admin
+        if (path.startsWith("/dashboard/admin") && token?.role !== "admin") {
+            return NextResponse.redirect(new URL(`/dashboard/${token.role}`, request.url));
+        }
+
         // If path starts with /dashboard/lecturer but user is not a lecturer
         if (path.startsWith("/dashboard/lecturer") && token?.role !== "lecturer") {
-            return NextResponse.redirect(new URL("/auth/login", request.url));
+            return NextResponse.redirect(new URL(`/dashboard/${token.role}`, request.url));
         }
 
         // If path starts with /dashboard/student but user is not a student
         if (path.startsWith("/dashboard/student") && token?.role !== "student") {
-            return NextResponse.redirect(new URL("/auth/login", request.url));
+            return NextResponse.redirect(new URL(`/dashboard/${token.role}`, request.url));
         }
 
         // Allow the user to proceed
@@ -36,5 +41,12 @@ export default withAuth(
 
 // Specify which routes this middleware should run on
 export const config = {
-    matcher: ["/dashboard/:path*"],
+    matcher: [
+        // Match all dashboard routes
+        '/dashboard/:path*',
+        // Specifically match admin routes
+        '/dashboard/admin/:path*',
+        // Add additional admin-specific routes if needed
+        '/admin/:path*',
+    ],
 };

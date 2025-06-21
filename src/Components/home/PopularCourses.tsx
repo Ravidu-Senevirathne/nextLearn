@@ -3,56 +3,54 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 import Image from 'next/image';
-import web from "../../images/web-development.jpg";
-import ds from "../../images/data-science.jpg";
-import { GlowingEffect } from "../../Components/ui/glowing-effect";
+import { GlowingEffect } from '@/Components/ui/glowing-effect';
 
-// Updated courses to match IDs in the course details page
+// Sample courses data
 const courses = [
   {
-    id: 1, // Introduction to Programming
-    title: "Introduction to Programming",
-    instructor: "Dr. Jane Smith",
+    id: 1,
+    title: "Web Development Fundamentals",
+    image: "/images/courses/web-dev.jpg",
     category: "Development",
     level: "Beginner",
+    instructor: "Dr. Jane Smith",
     rating: 4.8,
     students: 2340,
-    image: "https://placehold.co/600x400/3b82f6/FFFFFF/png?text=Programming+Basics",
-    price: "$49.99",
+    price: "$49.99"
   },
   {
-    id: 2, // Web Development Fundamentals
-    title: "Web Development Fundamentals",
-    instructor: "Michael Chen",
-    category: "Development",
+    id: 2,
+    title: "React Framework Deep Dive",
+    image: "/images/courses/react.jpg",
+    category: "JavaScript",
     level: "Intermediate",
+    instructor: "Michael Chen",
     rating: 4.9,
-    students: 3560,
-    image: "https://placehold.co/600x400/4f46e5/FFFFFF/png?text=Web+Development",
-    price: "$69.99",
+    students: 1876,
+    price: "$59.99"
   },
   {
-    id: 3, // React Framework
-    title: "React Framework",
-    instructor: "Sarah Johnson",
-    category: "Development",
-    level: "Advanced",
-    rating: 4.7,
-    students: 2890,
-    image: "https://placehold.co/600x400/06b6d4/FFFFFF/png?text=React+Framework",
-    price: "$79.99",
-  },
-  {
-    id: 4, // Data Science Essentials
+    id: 3,
     title: "Data Science Essentials",
-    instructor: "David Wilson",
+    image: "/images/courses/data-science.jpg",
     category: "Data Science",
     level: "Intermediate",
-    rating: 4.8,
-    students: 1950,
-    image: "https://placehold.co/600x400/10b981/FFFFFF/png?text=Data+Science",
-    price: "$89.99",
+    instructor: "Sarah Johnson",
+    rating: 4.7,
+    students: 3245,
+    price: "$64.99"
   },
+  {
+    id: 4,
+    title: "Mobile App Development",
+    image: "Mobile Development",
+    category: "Development",
+    level: "Advanced",
+    instructor: "David Wilson",
+    rating: 4.6,
+    students: 1532,
+    price: "$69.99"
+  }
 ];
 
 export default function PopularCourses() {
@@ -75,7 +73,7 @@ export default function PopularCourses() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           {courses.map((course, index) => (
-            <motion.div 
+            <motion.div
               key={course.id}
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -100,7 +98,7 @@ export default function PopularCourses() {
                         <span className="text-white text-lg font-medium">{course.category}</span>
                       </div>
                     ) : (
-                      <Image 
+                      <Image
                         src={course.image}
                         alt={course.title}
                         fill
@@ -137,7 +135,7 @@ export default function PopularCourses() {
                       </div>
                     </div>
                     <div className="mt-auto">
-                      <Link 
+                      <Link
                         href={`/courses/${course.id}`}
                         className="block w-full text-center bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white py-2 rounded-md transition-colors"
                       >
