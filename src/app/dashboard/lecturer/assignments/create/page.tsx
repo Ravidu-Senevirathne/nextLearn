@@ -1,8 +1,11 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ArrowLeft, Calendar, Clock, Plus, Trash2, Upload } from 'lucide-react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { assignmentService } from '@/services/assignmentService';
+import { CreateAssignmentDto } from '@/types/assignment';
 
 // Mock data for courses
 const courses = [
@@ -14,16 +17,18 @@ const courses = [
 ];
 
 export default function CreateAssignmentPage() {
-    const [formData, setFormData] = useState({
+    const router = useRouter();
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [formData, setFormData] = useState<Omit<CreateAssignmentDto, 'attachments'> & { dueTime: string }>({
         title: '',
         description: '',
         courseId: '',
         dueDate: '',
         dueTime: '',
         totalPoints: 100,
-        attachments: [] as File[],
     });
 
+    const [attachments, setAttachments] = useState<File[]>([]);
     const [formErrors, setFormErrors] = useState<Record<string, string>>({});
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -45,20 +50,14 @@ export default function CreateAssignmentPage() {
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files) {
             const newFiles = Array.from(e.target.files);
-            setFormData({
-                ...formData,
-                attachments: [...formData.attachments, ...newFiles]
-            });
+            setAttachments([...attachments, ...newFiles]);
         }
     };
 
     const removeAttachment = (index: number) => {
-        const updatedAttachments = [...formData.attachments];
+        const updatedAttachments = [...attachments];
         updatedAttachments.splice(index, 1);
-        setFormData({
-            ...formData,
-            attachments: updatedAttachments
-        });
+        setAttachments(updatedAttachments);
     };
 
     const validateForm = () => {
@@ -73,7 +72,7 @@ export default function CreateAssignmentPage() {
         return errors;
     };
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
         const errors = validateForm();
@@ -82,11 +81,32 @@ export default function CreateAssignmentPage() {
             return;
         }
 
-        // Here you would submit the form data to your backend
-        console.log("Form submitted:", formData);
+        setIsSubmitting(true);
 
-        // Redirect or show success message
-        alert("Assignment created successfully!");
+        try {
+            // Combine date and time for the dueDate field
+            const combinedDueDate = `${formData.dueDate}T${formData.dueTime}:00`;
+
+            const assignmentDto: CreateAssignmentDto = {
+                ...formData,
+                dueDate: combinedDueDate,
+            };
+
+            let result;
+            if (attachments.length > 0) {
+                result = await assignmentService.createWithFiles(assignmentDto, attachments);
+            } else {
+                result = await assignmentService.create(assignmentDto);
+            }
+
+            console.log("Assignment created:", result);
+            router.push('/dashboard/lecturer/assignments');
+        } catch (error) {
+            console.error("Error creating assignment:", error);
+            alert("Failed to create assignment. Please try again.");
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
     return (
@@ -246,11 +266,11 @@ export default function CreateAssignmentPage() {
                                 </label>
                             </div>
 
-                            {formData.attachments.length > 0 && (
+                            {attachments.length > 0 && (
                                 <div className="mt-4">
                                     <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Attached Files:</h4>
                                     <ul className="space-y-2">
-                                        {formData.attachments.map((file, index) => (
+                                        {attachments.map((file, index) => (
                                             <li key={index} className="flex items-center justify-between bg-gray-50 dark:bg-gray-700 p-2 rounded-md">
                                                 <span className="text-sm text-gray-800 dark:text-gray-200 truncate max-w-xs">{file.name}</span>
                                                 <button
@@ -276,9 +296,10 @@ export default function CreateAssignmentPage() {
                             </Link>
                             <button
                                 type="submit"
-                                className="px-4 py-2 bg-gradient-to-r from-teal-500 to-cyan-600 text-white rounded-md hover:from-teal-600 hover:to-cyan-700"
+                                disabled={isSubmitting}
+                                className={`px-4 py-2 bg-gradient-to-r from-teal-500 to-cyan-600 text-white rounded-md ${isSubmitting ? 'opacity-70 cursor-not-allowed' : 'hover:from-teal-600 hover:to-cyan-700'}`}
                             >
-                                Create Assignment
+                                {isSubmitting ? 'Creating...' : 'Create Assignment'}
                             </button>
                         </div>
                     </div>

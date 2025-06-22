@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import Link from 'next/link';
 import {
     Search,
@@ -35,64 +35,6 @@ import {
 import { Input } from "@/Components/ui/input";
 import { Label } from "@/Components/ui/label";
 
-// Mock data - replace with actual API calls
-const mockGroups = [
-    {
-        id: 1,
-        name: 'Team Alpha',
-        description: 'Working on the final project presentation',
-        members: 4,
-        createdAt: '2023-10-12',
-        course: 'Web Development',
-        status: 'active',
-    },
-    {
-        id: 2,
-        name: 'Data Analysts',
-        description: 'Statistical analysis group for research methods course',
-        members: 3,
-        createdAt: '2023-10-15',
-        course: 'Research Methods',
-        status: 'active',
-    },
-    {
-        id: 3,
-        name: 'UI/UX Team',
-        description: 'Design team for the mobile application project',
-        members: 5,
-        createdAt: '2023-10-10',
-        course: 'Mobile App Development',
-        status: 'active',
-    },
-    {
-        id: 4,
-        name: 'Literature Review Group',
-        description: 'Collaborative literature review for advanced topics',
-        members: 3,
-        createdAt: '2023-09-28',
-        course: 'Advanced Research Topics',
-        status: 'completed',
-    },
-    {
-        id: 5,
-        name: 'Machine Learning Lab',
-        description: 'Working on ML algorithms and implementations',
-        members: 4,
-        createdAt: '2023-10-05',
-        course: 'AI & Machine Learning',
-        status: 'active',
-    },
-];
-
-// Mock student data for adding to groups
-const mockStudents = [
-    { id: 1, name: 'John Doe', email: 'john.doe@example.com' },
-    { id: 2, name: 'Jane Smith', email: 'jane.smith@example.com' },
-    { id: 3, name: 'Michael Johnson', email: 'michael.j@example.com' },
-    { id: 4, name: 'Emily Brown', email: 'emily.b@example.com' },
-    { id: 5, name: 'Robert Wilson', email: 'robert.w@example.com' },
-];
-
 // Mock course data for group creation
 const mockCourses = [
     { id: 1, name: 'Web Development' },
@@ -105,7 +47,7 @@ const mockCourses = [
 export default function GroupsPage() {
     const { theme } = useTheme();
     const [searchQuery, setSearchQuery] = useState('');
-    const [groups, setGroups] = useState(mockGroups);
+    const [groups, setGroups] = useState([]);
     const [currentPage, setCurrentPage] = useState(1);
     const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'completed'>('all');
     const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
@@ -114,8 +56,40 @@ export default function GroupsPage() {
         description: '',
         course: '',
     });
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState('');
 
     const groupsPerPage = 10;
+
+    // Fetch groups from API
+    useEffect(() => {
+        const fetchGroups = async () => {
+            try {
+                setLoading(true);
+                const response = await fetch('http://localhost:8000/lecturer/groups', {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    credentials: 'include',
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Error ${response.status}: ${response.statusText}`);
+                }
+
+                const data = await response.json();
+                setGroups(data);
+            } catch (err: any) {
+                console.error("Error fetching groups:", err);
+                setError(err.message || 'Failed to load groups');
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchGroups();
+    }, []);
 
     // Filter groups based on search query and status
     const filteredGroups = useMemo(() => {
@@ -144,26 +118,76 @@ export default function GroupsPage() {
     const paginate = (pageNumber: number) => setCurrentPage(pageNumber);
 
     // Handle creating a new group
-    const handleCreateGroup = () => {
-        const newGroupData = {
-            id: groups.length + 1,
-            ...newGroup,
-            members: 0,
-            createdAt: new Date().toISOString().split('T')[0],
-            status: 'active',
-        };
+    const handleCreateGroup = async () => {
+        try {
+            const response = await fetch('http://localhost:8000/lecturer/groups', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(newGroup),
+                credentials: 'include',
+            });
 
-        setGroups([...groups, newGroupData]);
-        setNewGroup({ name: '', description: '', course: '' });
-        setIsCreateDialogOpen(false);
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                throw new Error(errorData.message || `Error ${response.status}: ${response.statusText}`);
+            }
+
+            const createdGroup = await response.json();
+            setGroups([...groups, createdGroup]);
+            setNewGroup({ name: '', description: '', course: '' });
+            setIsCreateDialogOpen(false);
+        } catch (err: any) {
+            console.error("Error creating group:", err);
+            alert(err.message || 'Failed to create group');
+        }
     };
 
     // Handle deleting a group
-    const handleDeleteGroup = (groupId: number) => {
+    const handleDeleteGroup = async (groupId: number) => {
         if (confirm('Are you sure you want to delete this group?')) {
-            setGroups(groups.filter(group => group.id !== groupId));
+            try {
+                const response = await fetch(`http://localhost:8000/lecturer/groups/${groupId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    credentials: 'include',
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Error ${response.status}: ${response.statusText}`);
+                }
+
+                setGroups(groups.filter(group => group.id !== groupId));
+            } catch (err: any) {
+                console.error("Error deleting group:", err);
+                alert(err.message || 'Failed to delete group');
+            }
         }
     };
+
+    // Show loading state
+    if (loading) {
+        return (
+            <div className="container mx-auto px-4 py-8 flex justify-center items-center h-[60vh]">
+                <div className="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+            </div>
+        );
+    }
+
+    // Show error state
+    if (error) {
+        return (
+            <div className="container mx-auto px-4 py-8">
+                <div className="bg-red-100 dark:bg-red-900/30 border border-red-400 dark:border-red-800 text-red-700 dark:text-red-300 px-4 py-3 rounded relative">
+                    <strong className="font-bold">Error: </strong>
+                    <span className="block sm:inline">{error}</span>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="container mx-auto px-4 py-8">

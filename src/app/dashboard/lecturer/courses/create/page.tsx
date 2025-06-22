@@ -180,27 +180,57 @@ const CourseCreatePage = () => {
         setIsSubmitting(true);
 
         try {
-            // In a real app, you would send the data to your API
-            // const response = await fetch('/api/courses', {
-            //   method: 'POST',
-            //   body: JSON.stringify(formData),
-            //   headers: {
-            //     'Content-Type': 'application/json'
-            //   }
-            // });
+            // Prepare form data for API
+            const courseData = new FormData();
 
-            // if (!response.ok) {
-            //   throw new Error('Failed to create course');
-            // }
+            // Add text fields
+            courseData.append('title', formData.title);
+            courseData.append('description', formData.description);
+            courseData.append('category', formData.category);
+            courseData.append('level', formData.level);
+            courseData.append('duration', formData.duration);
+            courseData.append('price', formData.price);
 
-            // Mock API call for demo
-            await new Promise(resolve => setTimeout(resolve, 1000));
+            // Add arrays as JSON strings
+            courseData.append('topics', JSON.stringify(formData.topics.filter(t => t.trim())));
+            courseData.append('features', JSON.stringify(formData.features.filter(f => f.trim())));
+            courseData.append('requirements', JSON.stringify(formData.requirements.filter(r => r.trim())));
 
-            // Redirect to the courses page after successful submission
+            // Add image if available
+            if (formData.image) {
+                courseData.append('image', formData.image);
+            }
+
+            // Send to API
+            const response = await fetch('http://localhost:8000/courses', {
+                method: 'POST',
+                body: courseData,
+                credentials: 'include',
+            });
+
+            console.log('Submitting course:', formData);
+
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                
+                // If there's a validation error, display it in a more user-friendly way
+                if (response.status === 400) {
+                    const errorMessages = errorData.message || [];
+                    const formattedErrors = Array.isArray(errorMessages) 
+                        ? errorMessages.join('\n') 
+                        : errorMessages;
+                    throw new Error(`Validation failed: ${formattedErrors}`);
+                }
+                
+                throw new Error(errorData.message || `Error ${response.status}: ${response.statusText}`);
+            }
+
+            // Redirect to courses page after successful submission
             router.push('/dashboard/lecturer/courses');
-        } catch (error) {
+        } catch (error: any) {
             console.error('Error creating course:', error);
-            // Handle error - show message to user
+            // Show error message to user - you could add a state for this
+            alert(`Failed to create course: ${error.message}`);
         } finally {
             setIsSubmitting(false);
         }
