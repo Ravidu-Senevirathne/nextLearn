@@ -1,5 +1,5 @@
 "use client";
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -43,7 +43,7 @@ const courses = [
   {
     id: 4,
     title: "Mobile App Development",
-    image: "Mobile Development",
+    image: "/images/courses/mobile-dev.jpg",
     category: "Development",
     level: "Advanced",
     instructor: "David Wilson",
@@ -54,6 +54,12 @@ const courses = [
 ];
 
 export default function PopularCourses() {
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
   return (
     <section className="py-16 bg-gray-950">
       <div className="container mx-auto px-4">
@@ -75,10 +81,10 @@ export default function PopularCourses() {
           {courses.map((course, index) => (
             <motion.div
               key={course.id}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
+              initial={isClient ? { opacity: 0, y: 20 } : { opacity: 1, y: 0 }}
+              whileInView={isClient ? { opacity: 1, y: 0 } : { opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: index * 0.1 }}
+              transition={isClient ? { duration: 0.5, delay: index * 0.1 } : { duration: 0 }}
               className="min-h-[24rem]"
             >
               <div className="relative h-full rounded-xl border border-gray-800 p-2">
@@ -93,11 +99,7 @@ export default function PopularCourses() {
                 />
                 <div className="relative flex h-full flex-col overflow-hidden rounded-lg bg-gray-900">
                   <div className="relative h-48 w-full">
-                    {typeof course.image === 'string' ? (
-                      <div className="absolute inset-0 bg-gray-800 flex items-center justify-center">
-                        <span className="text-white text-lg font-medium">{course.category}</span>
-                      </div>
-                    ) : (
+                    {course.image.startsWith('/images/') ? (
                       <Image
                         src={course.image}
                         alt={course.title}
@@ -105,6 +107,10 @@ export default function PopularCourses() {
                         className="object-cover"
                         priority={index < 2}
                       />
+                    ) : (
+                      <div className="absolute inset-0 bg-gray-800 flex items-center justify-center">
+                        <span className="text-white text-lg font-medium">{course.category}</span>
+                      </div>
                     )}
                   </div>
                   <div className="p-5 flex-1 flex flex-col">
@@ -127,7 +133,7 @@ export default function PopularCourses() {
                         <div className="text-yellow-400 mr-1">★</div>
                         <span className="text-white">{course.rating}</span>
                         <span className="text-gray-400 text-xs ml-1">
-                          ({course.students.toLocaleString()} students)
+                          ({course.students.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")} students)
                         </span>
                       </div>
                       <div className="text-blue-400 font-medium">

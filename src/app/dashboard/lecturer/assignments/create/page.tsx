@@ -7,14 +7,11 @@ import { useRouter } from 'next/navigation';
 import { assignmentService } from '@/services/assignmentService';
 import { CreateAssignmentDto } from '@/types/assignment';
 
-// Mock data for courses
-const courses = [
-    { id: 1, name: 'Advanced AI Concepts' },
-    { id: 2, name: 'Database Management' },
-    { id: 3, name: 'Human-Computer Interaction' },
-    { id: 4, name: 'Web Development' },
-    { id: 5, name: 'Mobile App Development' },
-];
+// Add Course type
+interface Course {
+    id: string;
+    title: string;
+}
 
 export default function CreateAssignmentPage() {
     const router = useRouter();
@@ -30,6 +27,24 @@ export default function CreateAssignmentPage() {
 
     const [attachments, setAttachments] = useState<File[]>([]);
     const [formErrors, setFormErrors] = useState<Record<string, string>>({});
+    const [courses, setCourses] = useState<Course[]>([]);
+
+    // Fetch courses from API
+    useEffect(() => {
+        const fetchCourses = async () => {
+            try {
+                const response = await fetch('http://localhost:8000/courses', {
+                    credentials: 'include',
+                });
+                if (!response.ok) throw new Error('Failed to fetch courses');
+                const data = await response.json();
+                setCourses(data);
+            } catch (error) {
+                console.error('Error fetching courses:', error);
+            }
+        };
+        fetchCourses();
+    }, []);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
@@ -175,7 +190,7 @@ export default function CreateAssignmentPage() {
                             >
                                 <option value="">Select a course</option>
                                 {courses.map(course => (
-                                    <option key={course.id} value={course.id}>{course.name}</option>
+                                    <option key={course.id} value={course.id}>{course.title}</option>
                                 ))}
                             </select>
                             {formErrors.courseId && (

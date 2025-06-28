@@ -4,77 +4,51 @@ import { useState, useEffect } from 'react';
 import {
     BookOpen, Search, Plus, Edit, Trash2, Filter,
     ArrowUpDown, FileText, Video, ExternalLink,
-    AlertCircle
+    AlertCircle, Loader2
 } from 'lucide-react';
 import Link from 'next/link';
 import { useTheme } from '@/hooks/useTheme';
 import { Button } from '@/Components/ui/button';
-
-// Dummy data for lessons - replace with actual API calls
-const dummyLessons = [
-    {
-        id: 1,
-        title: 'Introduction to React Hooks',
-        courseTitle: 'Advanced React',
-        type: 'video',
-        duration: '45 min',
-        status: 'published',
-        dateCreated: '2023-09-15'
-    },
-    {
-        id: 2,
-        title: 'State Management with Redux',
-        courseTitle: 'Advanced React',
-        type: 'document',
-        duration: '30 min',
-        status: 'published',
-        dateCreated: '2023-09-17'
-    },
-    {
-        id: 3,
-        title: 'Understanding TypeScript Interfaces',
-        courseTitle: 'TypeScript Fundamentals',
-        type: 'video',
-        duration: '55 min',
-        status: 'draft',
-        dateCreated: '2023-09-20'
-    },
-    {
-        id: 4,
-        title: 'Building REST APIs',
-        courseTitle: 'Backend Development',
-        type: 'document',
-        duration: '60 min',
-        status: 'published',
-        dateCreated: '2023-09-22'
-    },
-    {
-        id: 5,
-        title: 'Database Optimization',
-        courseTitle: 'Backend Development',
-        type: 'video',
-        duration: '50 min',
-        status: 'draft',
-        dateCreated: '2023-09-25'
-    }
-];
+import { lessonService, Lesson } from '@/services/lessonService';
 
 export default function LessonsPage() {
     const { theme } = useTheme();
     const [searchTerm, setSearchTerm] = useState('');
-    const [lessons, setLessons] = useState(dummyLessons);
+    const [allLessons, setAllLessons] = useState<Lesson[]>([]);
+    const [lessons, setLessons] = useState<Lesson[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
     const [filterStatus, setFilterStatus] = useState('all');
     const [filterType, setFilterType] = useState('all');
 
+    // Fetch lessons from API
+    useEffect(() => {
+        const fetchLessons = async () => {
+            try {
+                setLoading(true);
+                const data = await lessonService.getAll();
+                setAllLessons(data);
+                setError(null);
+            } catch (err) {
+                setError('Failed to load lessons');
+                console.error('Error fetching lessons:', err);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchLessons();
+    }, []);
+
     // Filter lessons based on search term and filters
     useEffect(() => {
-        let filteredLessons = dummyLessons;
+        let filteredLessons = allLessons;
 
         // Apply search filter
         if (searchTerm) {
             filteredLessons = filteredLessons.filter(lesson =>
                 lesson.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                lesson.courseTitle.toLowerCase().includes(searchTerm.toLowerCase())
+                (lesson.courseId && lesson.courseId.toLowerCase().includes(searchTerm.toLowerCase()))
             );
         }
 
@@ -88,14 +62,50 @@ export default function LessonsPage() {
         // Apply type filter
         if (filterType !== 'all') {
             filteredLessons = filteredLessons.filter(lesson =>
-                lesson.type === filterType
+                (lesson.contentType || lesson.type) === filterType
             );
         }
 
         setLessons(filteredLessons);
-    }, [searchTerm, filterStatus, filterType]);
+    }, [allLessons, searchTerm, filterStatus, filterType]);
 
-    const getLessonTypeIcon = (type) => {
+    // Delete lesson handler
+    const handleDeleteLesson = async (id: string) => {
+        if (!confirm('Are you sure you want to delete this lesson?')) {
+            return;
+        }
+
+        try {
+            await lessonService.deleteLesson(id);
+            // Remove the deleted lesson from both states
+            setAllLessons(prev => prev.filter(lesson => lesson.id !== id));
+            setLessons(prev => prev.filter(lesson => lesson.id !== id));
+        } catch (err) {
+            console.error('Error deleting lesson:', err);
+            alert('Failed to delete lesson');
+        }
+    };
+
+    // Format date
+    const formatDate = (dateString: string) => {
+        try {
+            return new Date(dateString).toLocaleDateString();
+        } catch {
+            return dateString;
+        }
+    };
+
+    // Format duration
+    const formatDuration = (duration: string) => {
+        // If duration is just a number (minutes), format it
+        if (!isNaN(Number(duration))) {
+            return `${duration} min`;
+        }
+        return duration;
+    };
+
+    const getLessonTypeIcon = (lesson: Lesson) => {
+        const type = lesson.contentType || lesson.type || 'document';
         switch (type) {
             case 'video':
                 return <Video size={18} className={theme === 'dark' ? 'text-blue-400' : 'text-teal-600'} />;
@@ -106,7 +116,7 @@ export default function LessonsPage() {
         }
     };
 
-    const getStatusBadge = (status) => {
+    const getStatusBadge = (status: string) => {
         if (status === 'published') {
             return (
                 <span className={`inline-block px-2 py-1 text-xs rounded-full ${theme === 'dark' ? 'bg-green-900 text-green-100' : 'bg-green-100 text-green-800'
@@ -123,6 +133,36 @@ export default function LessonsPage() {
             );
         }
     };
+
+    // Show loading state
+    if (loading) {
+        return (
+            <div className="container mx-auto px-4 py-8">
+                <div className="flex justify-center items-center h-40">
+                    <Loader2 className="animate-spin h-8 w-8 text-primary" />
+                    <span className="ml-2">Loading lessons...</span>
+                </div>
+            </div>
+        );
+    }
+
+    // Show error state
+    if (error) {
+        return (
+            <div className="container mx-auto px-4 py-8">
+                <div className="p-6 bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200 rounded-md">
+                    <p className="font-medium">Error</p>
+                    <p>{error}</p>
+                    <button
+                        onClick={() => window.location.reload()}
+                        className="mt-2 px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700"
+                    >
+                        Retry
+                    </button>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="container mx-auto px-4 py-8">
@@ -157,8 +197,8 @@ export default function LessonsPage() {
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
                             className={`pl-10 pr-4 py-2 w-full rounded-md ${theme === 'dark'
-                                    ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400'
-                                    : 'bg-white border-gray-300 text-gray-900 placeholder-gray-400'
+                                ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400'
+                                : 'bg-white border-gray-300 text-gray-900 placeholder-gray-400'
                                 } border focus:outline-none focus:ring-2 ${theme === 'dark' ? 'focus:ring-blue-500' : 'focus:ring-teal-500'
                                 }`}
                         />
@@ -170,8 +210,8 @@ export default function LessonsPage() {
                                 value={filterStatus}
                                 onChange={(e) => setFilterStatus(e.target.value)}
                                 className={`w-full px-3 py-2 rounded-md border ${theme === 'dark'
-                                        ? 'bg-gray-700 border-gray-600 text-white'
-                                        : 'bg-white border-gray-300 text-gray-900'
+                                    ? 'bg-gray-700 border-gray-600 text-white'
+                                    : 'bg-white border-gray-300 text-gray-900'
                                     } focus:outline-none focus:ring-2 ${theme === 'dark' ? 'focus:ring-blue-500' : 'focus:ring-teal-500'
                                     }`}
                             >
@@ -186,8 +226,8 @@ export default function LessonsPage() {
                                 value={filterType}
                                 onChange={(e) => setFilterType(e.target.value)}
                                 className={`w-full px-3 py-2 rounded-md border ${theme === 'dark'
-                                        ? 'bg-gray-700 border-gray-600 text-white'
-                                        : 'bg-white border-gray-300 text-gray-900'
+                                    ? 'bg-gray-700 border-gray-600 text-white'
+                                    : 'bg-white border-gray-300 text-gray-900'
                                     } focus:outline-none focus:ring-2 ${theme === 'dark' ? 'focus:ring-blue-500' : 'focus:ring-teal-500'
                                     }`}
                             >
@@ -213,7 +253,7 @@ export default function LessonsPage() {
                                         </div>
                                     </th>
                                     <th scope="col" className={`px-6 py-3 text-left text-xs font-medium ${theme === 'dark' ? 'text-gray-300' : 'text-gray-500'} uppercase tracking-wider`}>
-                                        Course
+                                        Course ID
                                     </th>
                                     <th scope="col" className={`px-6 py-3 text-left text-xs font-medium ${theme === 'dark' ? 'text-gray-300' : 'text-gray-500'} uppercase tracking-wider`}>
                                         Type
@@ -242,46 +282,56 @@ export default function LessonsPage() {
                                             </div>
                                         </td>
                                         <td className={`px-6 py-4 whitespace-nowrap ${theme === 'dark' ? 'text-gray-300' : 'text-gray-500'}`}>
-                                            {lesson.courseTitle}
+                                            {lesson.courseId}
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap">
                                             <div className="flex items-center">
-                                                {getLessonTypeIcon(lesson.type)}
-                                                <span className={`ml-2 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-500'}`}>
-                                                    {lesson.type.charAt(0).toUpperCase() + lesson.type.slice(1)}
-                                                </span>
+                                                {getLessonTypeIcon(lesson)}
+                                                {(() => {
+                                                    const typeLabel = String(lesson.contentType || lesson.type || 'document');
+                                                    return (
+                                                        <span className={`ml-2 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-500'}`}>
+                                                            {typeLabel.charAt(0).toUpperCase() + typeLabel.slice(1)}
+                                                        </span>
+                                                    );
+                                                })()}
                                             </div>
                                         </td>
                                         <td className={`px-6 py-4 whitespace-nowrap ${theme === 'dark' ? 'text-gray-300' : 'text-gray-500'}`}>
-                                            {lesson.duration}
+                                            {formatDuration(lesson.duration)}
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap">
                                             {getStatusBadge(lesson.status)}
                                         </td>
                                         <td className={`px-6 py-4 whitespace-nowrap ${theme === 'dark' ? 'text-gray-300' : 'text-gray-500'}`}>
-                                            {lesson.dateCreated}
+                                            {formatDate(lesson.createdAt)}
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-right">
                                             <div className="flex justify-end space-x-2">
+                                                <Link href={`/dashboard/lecturer/lessons/${lesson.id}`}>
+                                                    <button
+                                                        className={`p-1 rounded-full ${theme === 'dark'
+                                                            ? 'hover:bg-gray-600 text-gray-300'
+                                                            : 'hover:bg-gray-100 text-gray-600'
+                                                            }`}
+                                                        title="Preview"
+                                                    >
+                                                        <ExternalLink size={18} />
+                                                    </button>
+                                                </Link>
+                                                <Link href={`/dashboard/lecturer/lessons/${lesson.id}/edit`}>
+                                                    <button
+                                                        className={`p-1 rounded-full ${theme === 'dark'
+                                                            ? 'hover:bg-gray-600 text-blue-400'
+                                                            : 'hover:bg-gray-100 text-teal-600'
+                                                            }`}
+                                                        title="Edit"
+                                                    >
+                                                        <Edit size={18} />
+                                                    </button>
+                                                </Link>
                                                 <button
-                                                    className={`p-1 rounded-full ${theme === 'dark'
-                                                        ? 'hover:bg-gray-600 text-gray-300'
-                                                        : 'hover:bg-gray-100 text-gray-600'
-                                                        }`}
-                                                    title="Preview"
-                                                >
-                                                    <ExternalLink size={18} />
-                                                </button>
-                                                <button
-                                                    className={`p-1 rounded-full ${theme === 'dark'
-                                                        ? 'hover:bg-gray-600 text-blue-400'
-                                                        : 'hover:bg-gray-100 text-teal-600'
-                                                        }`}
-                                                    title="Edit"
-                                                >
-                                                    <Edit size={18} />
-                                                </button>
-                                                <button
+                                                    onClick={() => handleDeleteLesson(lesson.id)}
                                                     className={`p-1 rounded-full ${theme === 'dark'
                                                         ? 'hover:bg-gray-600 text-red-400'
                                                         : 'hover:bg-gray-100 text-red-500'
@@ -331,8 +381,8 @@ export default function LessonsPage() {
                         <button
                             disabled
                             className={`px-3 py-1 rounded-md ${theme === 'dark'
-                                    ? 'bg-gray-700 text-gray-400 cursor-not-allowed'
-                                    : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                                ? 'bg-gray-700 text-gray-400 cursor-not-allowed'
+                                : 'bg-gray-100 text-gray-400 cursor-not-allowed'
                                 }`}
                         >
                             Previous
@@ -340,8 +390,8 @@ export default function LessonsPage() {
                         <button
                             disabled
                             className={`px-3 py-1 rounded-md ${theme === 'dark'
-                                    ? 'bg-gray-700 text-gray-400 cursor-not-allowed'
-                                    : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                                ? 'bg-gray-700 text-gray-400 cursor-not-allowed'
+                                : 'bg-gray-100 text-gray-400 cursor-not-allowed'
                                 }`}
                         >
                             Next

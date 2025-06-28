@@ -6,14 +6,23 @@ import Link from 'next/link';
 import { useTheme } from 'next-themes';
 import { assignmentService } from '@/services/assignmentService';
 import { Assignment } from '@/types/assignment';
+import { Course } from '@/types/course';
 import { format, parse, isAfter } from 'date-fns';
+
+// Extend Assignment type for local UI state
+interface AssignmentWithStats extends Assignment {
+    status: 'Active' | 'Expired' | 'Draft';
+    submissions: number;
+    totalStudents: number;
+}
 
 export default function AssignmentsPage() {
     const [filter, setFilter] = useState('all');
     const [searchQuery, setSearchQuery] = useState('');
     const { theme, resolvedTheme } = useTheme();
     const [mounted, setMounted] = useState(false);
-    const [assignments, setAssignments] = useState<Assignment[]>([]);
+    const [assignments, setAssignments] = useState<AssignmentWithStats[]>([]);
+    const [courses, setCourses] = useState<Course[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
@@ -22,39 +31,39 @@ export default function AssignmentsPage() {
         setMounted(true);
     }, []);
 
-    // Fetch assignments
+    // Fetch assignments and courses
     useEffect(() => {
-        const fetchAssignments = async () => {
+        const fetchData = async () => {
             try {
                 setLoading(true);
+                // Fetch assignments
                 const data = await assignmentService.getAll();
-
+                // Fetch courses
+                const coursesRes = await fetch('http://localhost:8000/courses', { credentials: 'include' });
+                const coursesData = await coursesRes.json();
+                setCourses(coursesData);
                 // Process the data to include calculated fields
-                const processedAssignments = data.map(assignment => {
-                    // Determine if assignment is active/expired based on due date
+                const processedAssignments: AssignmentWithStats[] = data.map((assignment: Assignment) => {
                     const now = new Date();
                     const dueDate = new Date(assignment.dueDate);
-
                     return {
                         ...assignment,
                         status: isAfter(dueDate, now) ? 'Active' : 'Expired',
-                        // Mock values until we have real data
                         submissions: Math.floor(Math.random() * 30),
                         totalStudents: 30
                     };
                 });
-
                 setAssignments(processedAssignments);
                 setError(null);
             } catch (err: any) {
-                console.error("Error fetching assignments:", err);
+                console.error("Error fetching assignments or courses:", err);
                 setError(err.message || "Failed to load assignments");
             } finally {
                 setLoading(false);
             }
         };
 
-        fetchAssignments();
+        fetchData();
     }, []);
 
     const isDark = mounted && (theme === 'dark' || resolvedTheme === 'dark');
@@ -157,7 +166,9 @@ export default function AssignmentsPage() {
                                             {assignment.title}
                                         </Link>
                                     </div>
-                                    <div className="col-span-2 text-sm text-gray-600 dark:text-gray-300">{assignment.courseId}</div>
+                                    <div className="col-span-2 text-sm text-gray-600 dark:text-gray-300">
+                                        {courses.find(c => c.id === assignment.courseId)?.title || assignment.courseId}
+                                    </div>
                                     <div className="col-span-2 text-sm flex items-center text-gray-600 dark:text-gray-300">
                                         <Calendar size={14} className="mr-2 text-gray-500 dark:text-gray-400" />
                                         {formatDate(assignment.dueDate)}
