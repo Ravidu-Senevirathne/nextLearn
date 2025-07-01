@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import {
@@ -16,6 +16,7 @@ import {
     ChevronUp,
     ChevronDown,
 } from 'lucide-react';
+import { createQuiz } from '@/services/quizService';
 
 // Sample course data
 const courses = [
@@ -65,6 +66,26 @@ const CreateQuizPage = () => {
     ]);
 
     const [questionErrors, setQuestionErrors] = useState<{ [key: string]: string }>({});
+
+    // Course state
+    const [courses, setCourses] = useState<{ id: string, title: string }[]>([]);
+    const [error, setError] = useState('');
+
+    useEffect(() => {
+        // Fetch courses from API
+        const fetchCourses = async () => {
+            try {
+                // Replace with your actual API endpoint for courses
+                const response = await fetch('http://localhost:8000/courses');
+                if (!response.ok) throw new Error('Failed to fetch courses');
+                const data = await response.json();
+                setCourses(data);
+            } catch (err) {
+                setCourses([]);
+            }
+        };
+        fetchCourses();
+    }, []);
 
     // Add a new question
     const addQuestion = (type: QuestionType) => {
@@ -245,12 +266,19 @@ const CreateQuizPage = () => {
     };
 
     // Handle quiz submission
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
         if (!validateQuestions()) {
             return;
         }
+
+        // Add order to each question
+        const questionsWithOrder = questions.map((q, idx) => ({
+            ...q,
+            order: idx + 1, // 1-based order
+            points: typeof q.points === 'number' ? q.points : 1,
+        }));
 
         // Create quiz object
         const quizData = {
@@ -263,14 +291,18 @@ const CreateQuizPage = () => {
             shuffleQuestions,
             showCorrectAnswers,
             maxAttempts,
-            questions,
+            questions: questionsWithOrder,
         };
 
         console.log('Quiz data to be submitted:', quizData);
         // Here you would typically make an API call to save the quiz
-
-        alert('Quiz created successfully!');
-        router.push('/dashboard/lecturer/quizzes');
+        try {
+            await createQuiz(quizData);
+            alert('Quiz created successfully!');
+            router.push('/dashboard/lecturer/quizzes');
+        } catch (err) {
+            setError(err instanceof Error ? err.message : 'Failed to create quiz');
+        }
     };
 
     return (
@@ -306,6 +338,8 @@ const CreateQuizPage = () => {
                     </button>
                 </div>
             </div>
+
+            {error && <div className="mb-4 p-2 bg-red-100 text-red-700 rounded">{error}</div>}
 
             {/* Progress steps */}
             <div className="mb-8">
@@ -379,9 +413,13 @@ const CreateQuizPage = () => {
                                         onChange={(e) => setCourseId(e.target.value)}
                                     >
                                         <option value="">Select a course</option>
-                                        {courses.map(course => (
-                                            <option key={course.id} value={course.id}>{course.title}</option>
-                                        ))}
+                                        {courses.length > 0 ? (
+                                            courses.map((course) => (
+                                                <option key={course.id} value={course.id}>{course.title}</option>
+                                            ))
+                                        ) : (
+                                            <option value="">No courses available</option>
+                                        )}
                                     </select>
                                 </div>
                             </div>

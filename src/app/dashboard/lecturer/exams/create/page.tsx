@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import {
@@ -44,14 +44,6 @@ import { Checkbox } from '@/Components/ui/checkbox';
 import { Switch } from '@/Components/ui/switch';
 import { Label } from '@/Components/ui/label';
 import { Separator } from '@/Components/ui/separator';
-
-// Sample courses data for the dropdown
-const courses = [
-    { id: "1", title: "Web Development Fundamentals" },
-    { id: "2", title: "Advanced JavaScript" },
-    { id: "3", title: "Backend Development" },
-    { id: "4", title: "UI/UX Design Principles" }
-];
 
 // Question types
 const questionTypes = [
@@ -102,6 +94,28 @@ const CreateExamPage = () => {
         marks: 10
     });
 
+    // Courses state
+    const [courses, setCourses] = useState<{ id: string; title: string }[]>([]);
+
+    // Fetch courses on component mount
+    useEffect(() => {
+        const fetchCourses = async () => {
+            try {
+                const response = await fetch('http://localhost:8000/courses');
+                if (!response.ok) {
+                    throw new Error('Failed to fetch courses');
+                }
+                const data = await response.json();
+                setCourses(data);
+            } catch (error) {
+                console.error('Error fetching courses:', error);
+                // Optionally show error to user
+            }
+        };
+
+        fetchCourses();
+    }, []);
+
     const addQuestion = () => {
         // Add current question to the list and create a new empty one
         setQuestions([...questions, currentQuestion]);
@@ -133,7 +147,7 @@ const CreateExamPage = () => {
     };
 
     const updateQuestionType = (type: string) => {
-        let options;
+        let options: { id: string; text: string; isCorrect: boolean }[];
 
         if (type === 'multiple_choice') {
             options = currentQuestion.options?.length ?
@@ -540,13 +554,13 @@ const CreateExamPage = () => {
                                         </div>
 
                                         {/* Options for multiple choice / true-false questions */}
-                                        {['multiple_choice', 'true_false'].includes(currentQuestion.type) && currentQuestion.options && (
+                                        {['multiple_choice', 'true_false'].includes(currentQuestion.type) && (currentQuestion.options ?? []).length > 0 && (
                                             <div className="space-y-3">
                                                 <Label className={theme === 'dark' ? 'text-gray-200' : ''}>
                                                     Options (select the correct answer)
                                                 </Label>
 
-                                                {currentQuestion.options.map(option => (
+                                                {(currentQuestion.options ?? []).map(option => (
                                                     <div key={option.id} className="flex items-center space-x-3">
                                                         <Checkbox
                                                             id={`option-${option.id}`}
@@ -563,7 +577,7 @@ const CreateExamPage = () => {
                                                                 disabled={currentQuestion.type === 'true_false'}
                                                             />
                                                         </div>
-                                                        {currentQuestion.type !== 'true_false' && currentQuestion.options.length > 2 && (
+                                                        {currentQuestion.type !== 'true_false' && (currentQuestion.options?.length ?? 0) > 2 && (
                                                             <Button
                                                                 type="button"
                                                                 variant="ghost"
