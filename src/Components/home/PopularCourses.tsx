@@ -1,61 +1,65 @@
 "use client";
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 import Image from 'next/image';
-import web from "../../images/web-development.jpg";
-import ds from "../../images/data-science.jpg";
-import { GlowingEffect } from "../../Components/ui/glowing-effect";
+import { GlowingEffect } from '@/Components/ui/glowing-effect';
 
-// Updated courses to match IDs in the course details page
+// Sample courses data
 const courses = [
   {
-    id: 1, // Introduction to Programming
-    title: "Introduction to Programming",
-    instructor: "Dr. Jane Smith",
+    id: 1,
+    title: "Web Development Fundamentals",
+    image: "/images/courses/web-dev.jpg",
     category: "Development",
     level: "Beginner",
+    instructor: "Dr. Jane Smith",
     rating: 4.8,
     students: 2340,
-    image: "https://placehold.co/600x400/3b82f6/FFFFFF/png?text=Programming+Basics",
-    price: "$49.99",
+    price: "$49.99"
   },
   {
-    id: 2, // Web Development Fundamentals
-    title: "Web Development Fundamentals",
-    instructor: "Michael Chen",
-    category: "Development",
+    id: 2,
+    title: "React Framework Deep Dive",
+    image: "/images/courses/react.jpg",
+    category: "JavaScript",
     level: "Intermediate",
+    instructor: "Michael Chen",
     rating: 4.9,
-    students: 3560,
-    image: "https://placehold.co/600x400/4f46e5/FFFFFF/png?text=Web+Development",
-    price: "$69.99",
+    students: 1876,
+    price: "$59.99"
   },
   {
-    id: 3, // React Framework
-    title: "React Framework",
-    instructor: "Sarah Johnson",
-    category: "Development",
-    level: "Advanced",
-    rating: 4.7,
-    students: 2890,
-    image: "https://placehold.co/600x400/06b6d4/FFFFFF/png?text=React+Framework",
-    price: "$79.99",
-  },
-  {
-    id: 4, // Data Science Essentials
+    id: 3,
     title: "Data Science Essentials",
-    instructor: "David Wilson",
+    image: "/images/courses/data-science.jpg",
     category: "Data Science",
     level: "Intermediate",
-    rating: 4.8,
-    students: 1950,
-    image: "https://placehold.co/600x400/10b981/FFFFFF/png?text=Data+Science",
-    price: "$89.99",
+    instructor: "Sarah Johnson",
+    rating: 4.7,
+    students: 3245,
+    price: "$64.99"
   },
+  {
+    id: 4,
+    title: "Mobile App Development",
+    image: "/images/courses/mobile-dev.jpg",
+    category: "Development",
+    level: "Advanced",
+    instructor: "David Wilson",
+    rating: 4.6,
+    students: 1532,
+    price: "$69.99"
+  }
 ];
 
 export default function PopularCourses() {
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
   return (
     <section className="py-16 bg-gray-950">
       <div className="container mx-auto px-4">
@@ -75,12 +79,12 @@ export default function PopularCourses() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           {courses.map((course, index) => (
-            <motion.div 
+            <motion.div
               key={course.id}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
+              initial={isClient ? { opacity: 0, y: 20 } : { opacity: 1, y: 0 }}
+              whileInView={isClient ? { opacity: 1, y: 0 } : { opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: index * 0.1 }}
+              transition={isClient ? { duration: 0.5, delay: index * 0.1 } : { duration: 0 }}
               className="min-h-[24rem]"
             >
               <div className="relative h-full rounded-xl border border-gray-800 p-2">
@@ -95,18 +99,18 @@ export default function PopularCourses() {
                 />
                 <div className="relative flex h-full flex-col overflow-hidden rounded-lg bg-gray-900">
                   <div className="relative h-48 w-full">
-                    {typeof course.image === 'string' ? (
-                      <div className="absolute inset-0 bg-gray-800 flex items-center justify-center">
-                        <span className="text-white text-lg font-medium">{course.category}</span>
-                      </div>
-                    ) : (
-                      <Image 
+                    {course.image.startsWith('/images/') ? (
+                      <Image
                         src={course.image}
                         alt={course.title}
                         fill
                         className="object-cover"
                         priority={index < 2}
                       />
+                    ) : (
+                      <div className="absolute inset-0 bg-gray-800 flex items-center justify-center">
+                        <span className="text-white text-lg font-medium">{course.category}</span>
+                      </div>
                     )}
                   </div>
                   <div className="p-5 flex-1 flex flex-col">
@@ -129,7 +133,7 @@ export default function PopularCourses() {
                         <div className="text-yellow-400 mr-1">★</div>
                         <span className="text-white">{course.rating}</span>
                         <span className="text-gray-400 text-xs ml-1">
-                          ({course.students.toLocaleString()} students)
+                          ({course.students.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")} students)
                         </span>
                       </div>
                       <div className="text-blue-400 font-medium">
@@ -137,7 +141,7 @@ export default function PopularCourses() {
                       </div>
                     </div>
                     <div className="mt-auto">
-                      <Link 
+                      <Link
                         href={`/courses/${course.id}`}
                         className="block w-full text-center bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white py-2 rounded-md transition-colors"
                       >

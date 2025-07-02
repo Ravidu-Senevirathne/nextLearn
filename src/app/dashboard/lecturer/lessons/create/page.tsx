@@ -1,13 +1,15 @@
 "use client";
 
-import { useState, FormEvent, ChangeEvent } from 'react';
+import { useState, FormEvent, ChangeEvent, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import {
     BookOpen, Save, ArrowLeft, FileText, Video, Upload, Eye,
-    X, HelpCircle, AlertTriangle
+    X, HelpCircle, AlertTriangle, Loader2
 } from 'lucide-react';
 import Link from 'next/link';
 import { useTheme } from '@/hooks/useTheme';
 import { Button } from '@/Components/ui/button';
+import { lessonService, CreateLessonParams } from '@/services/lessonService';
 
 // Define the structure for form errors
 interface FormErrors {
@@ -16,10 +18,19 @@ interface FormErrors {
     description?: string;
     videoUrl?: string;
     documentFile?: string;
+    duration?: string;
+    serverError?: string;
+}
+
+// Define course interface
+interface Course {
+    id: string;
+    title: string;
 }
 
 export default function CreateLessonPage() {
     const { theme } = useTheme();
+    const router = useRouter();
     const [lessonType, setLessonType] = useState('video');
     const [lessonTitle, setLessonTitle] = useState('');
     const [courseId, setCourseId] = useState('');
@@ -30,16 +41,33 @@ export default function CreateLessonPage() {
     const [status, setStatus] = useState('draft');
     const [submitted, setSubmitted] = useState(false);
     const [errors, setErrors] = useState<FormErrors>({});
+    const [isLoading, setIsLoading] = useState(false);
+    const [courses, setCourses] = useState<Course[]>([]);
 
-    // Sample course data for dropdown
-    const courses = [
-        { id: '1', title: 'Web Development Fundamentals' },
-        { id: '2', title: 'Advanced JavaScript' },
-        { id: '3', title: 'Backend Development' },
-        { id: '4', title: 'UI/UX Design Principles' }
-    ];
+    // Fetch courses on component mount
+    useEffect(() => {
+        const fetchCourses = async () => {
+            try {
+                // Replace with your actual course API endpoint
+                const response = await fetch('http://localhost:8000/courses', {
+                    credentials: 'include',
+                });
 
-    const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+                if (!response.ok) {
+                    throw new Error('Failed to fetch courses');
+                }
+
+                const data = await response.json();
+                setCourses(data);
+            } catch (error) {
+                console.error('Error fetching courses:', error);
+            }
+        };
+
+        fetchCourses();
+    }, []);
+
+    const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault();
 
         // Basic validation
@@ -56,29 +84,56 @@ export default function CreateLessonPage() {
             newErrors.documentFile = 'Document file is required';
         }
 
+        // Validate duration if provided
+        if (duration && (isNaN(parseInt(duration, 10)) || parseInt(duration, 10) < 1)) {
+            newErrors.duration = 'Duration must be a valid positive number';
+        }
+
         if (Object.keys(newErrors).length > 0) {
             setErrors(newErrors);
             return;
         }
 
         // Form is valid, proceed with submission
-        setSubmitted(true);
+        setIsLoading(true);
         setErrors({});
 
-        // Here you would typically make an API call to save the lesson
-        console.log({
-            title: lessonTitle,
-            courseId,
-            description,
-            duration,
-            type: lessonType,
-            status,
-            documentFile: documentFile?.name,
-            videoUrl
-        });
+        try {
+            // Prepare data for API call
+            const lessonData: CreateLessonParams = {
+                title: lessonTitle,
+                courseId,
+                description,
+                // Convert duration to integer if provided
+                duration: duration ? parseInt(duration, 10) : undefined,
+                // Explicitly set contentType to one of the allowed values
+                contentType: lessonType as 'video' | 'document',
+                status: status as 'draft' | 'published',
+                videoUrl: lessonType === 'video' ? videoUrl : undefined,
+                documentFile: lessonType === 'document' ? documentFile || undefined : undefined
+            };
 
-        // Reset form or redirect after successful submission
-        // window.location.href = "/dashboard/lecturer/lessons";
+            console.log('Submitting lesson data:', lessonData);
+
+            // Send to API
+            await lessonService.createLesson(lessonData);
+
+            // Show success message and redirect after a delay
+            setSubmitted(true);
+
+            // Redirect after showing success message for a moment
+            setTimeout(() => {
+                router.push('/dashboard/lecturer/lessons');
+            }, 2000);
+
+        } catch (error) {
+            console.error('Error creating lesson:', error);
+            setErrors({
+                serverError: error instanceof Error ? error.message : 'An unexpected error occurred'
+            });
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -109,6 +164,13 @@ export default function CreateLessonPage() {
                     Add a new lesson to your course
                 </p>
             </div>
+
+            {errors.serverError && (
+                <div className={`mb-6 p-4 rounded-lg bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-100`}>
+                    <p className="font-medium">Error</p>
+                    <p className="mt-1">{errors.serverError}</p>
+                </div>
+            )}
 
             {submitted && (
                 <div className={`mb-6 p-4 rounded-lg ${theme === 'dark' ? 'bg-green-900 text-green-100' : 'bg-green-100 text-green-800'
@@ -160,13 +222,13 @@ export default function CreateLessonPage() {
                                 value={courseId}
                                 onChange={(e) => setCourseId(e.target.value)}
                                 className={`w-full px-3 py-2 rounded-md border ${errors.courseId ? 'border-red-500' :
-                                    theme === 'dark' ? 'bg-gray-700 border-gray-600 text-white' : 'bg-gray-500 border-gray-300 text-gray-900'
+                                    theme === 'dark' ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'
                                     } focus:outline-none focus:ring-2 ${theme === 'dark' ? 'focus:ring-blue-500' : 'focus:ring-teal-500'
-                                    } [&>option]:text-black [&>option]:bg-white ${theme === 'dark' && '[&>option]:bg-gray-700 [&>option]:text-black'}`}
+                                    }`}
                             >
                                 <option value="">Select a course</option>
                                 {courses.map((course) => (
-                                    <option  className='bg-gray-500 text-black' key={course.id} value={course.id}>
+                                    <option key={course.id} value={course.id}>
                                         {course.title}
                                     </option>
                                 ))}
@@ -207,17 +269,22 @@ export default function CreateLessonPage() {
                                 Duration (minutes)
                             </label>
                             <input
-                                type="text"
+                                type="number"
                                 id="duration"
                                 value={duration}
                                 onChange={(e) => setDuration(e.target.value)}
-                                className={`w-full px-3 py-2 rounded-md border ${theme === 'dark' ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'
+                                min="1"
+                                className={`w-full px-3 py-2 rounded-md border ${errors.duration ? 'border-red-500' : 
+                                    theme === 'dark' ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'
                                     } focus:outline-none focus:ring-2 ${theme === 'dark' ? 'focus:ring-blue-500' : 'focus:ring-teal-500'
                                     }`}
                                 placeholder="e.g., 45"
                             />
+                            {errors.duration && (
+                                <p className="mt-1 text-sm text-red-500">{errors.duration}</p>
+                            )}
                             <p className={`mt-1 text-xs ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
-                                Optional: Estimated time to complete this lesson
+                                Optional: Estimated time to complete this lesson (in minutes)
                             </p>
                         </div>
                     </div>
@@ -492,13 +559,22 @@ export default function CreateLessonPage() {
 
                         <Button
                             type="submit"
+                            disabled={isLoading}
                             className={
                                 theme === 'dark'
                                     ? 'bg-blue-600 hover:bg-blue-700 text-white'
                                     : 'bg-teal-600 hover:bg-teal-700 text-white'
                             }
                         >
-                            <Save size={16} className="mr-2" /> Save Lesson
+                            {isLoading ? (
+                                <>
+                                    <Loader2 size={16} className="mr-2 animate-spin" /> Saving...
+                                </>
+                            ) : (
+                                <>
+                                    <Save size={16} className="mr-2" /> Save Lesson
+                                </>
+                            )}
                         </Button>
                     </div>
                 </div>

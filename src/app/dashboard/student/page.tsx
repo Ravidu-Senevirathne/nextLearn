@@ -1,8 +1,7 @@
 "use client";
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { BookOpen, Clock, Award, BarChart2, Download, Calendar } from 'lucide-react';
-import StudentDashboardLayout from '@/Components/Dashboard/student/Layout';
 import StatCard from '@/Components/Dashboard/student/StatCard';
 import CourseCard from '@/Components/Dashboard/student/CourseCard';
 import AssignmentsList from '@/Components/Dashboard/student/AssignmentsList';
@@ -11,6 +10,7 @@ import ScheduleList from '@/Components/Dashboard/student/ScheduleList';
 import NotificationsPanel from '@/Components/Dashboard/student/NotificationsPanel';
 import { StatisticItem, Course, Assignment, Quiz, ScheduleEvent, Notification } from '@/Components/Dashboard/student/types';
 import Link from 'next/link';
+import { studentAssignmentService } from '@/services/studentAssignmentService';
 
 // Sample data for the dashboard - would come from API in real app
 const statistics: StatisticItem[] = [
@@ -47,30 +47,6 @@ const courses: Course[] = [
     nextLesson: 'User Testing',
     image: '/images/ui-ux-design.jpg',
     category: 'Design'
-  },
-];
-
-const assignments: Assignment[] = [
-  {
-    id: '1',
-    title: 'Create a Responsive Landing Page',
-    course: 'Web Development Fundamentals',
-    dueDate: 'Tomorrow, 11:59 PM',
-    status: 'pending'
-  },
-  {
-    id: '2',
-    title: 'Data Visualization Project',
-    course: 'Data Science Essentials',
-    dueDate: 'Jul 25, 11:59 PM',
-    status: 'pending'
-  },
-  {
-    id: '3',
-    title: 'Website Wireframe',
-    course: 'UI/UX Design Principles',
-    dueDate: 'Jul 22, 11:59 PM',
-    status: 'submitted'
   },
 ];
 
@@ -149,8 +125,31 @@ const notifications: Notification[] = [
 ];
 
 const StudentDashboard = () => {
+  const [assignments, setAssignments] = useState<Assignment[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchAssignments = async () => {
+      try {
+        setLoading(true);
+        const data = await studentAssignmentService.getPending();
+        setAssignments(data.slice(0, 3)); // Show only the first 3
+        setError(null);
+      } catch (err: any) {
+        console.error("Error fetching assignments:", err);
+        setError(err.message || "Failed to load assignments");
+        setAssignments([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchAssignments();
+  }, []);
+
   return (
-    <StudentDashboardLayout>
+    <>
       {/* Welcome section */}
       <section className="mb-8">
         <h2 className="text-2xl font-bold mb-1">Welcome back, Alex!</h2>
@@ -184,7 +183,13 @@ const StudentDashboard = () => {
 
       {/* Two column layout for assignments/quizzes and schedule/notifications */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-        <AssignmentsList assignments={assignments} />
+        {loading ? (
+          <div className="p-4 text-center">Loading assignments...</div>
+        ) : error ? (
+          <div className="p-4 text-red-500">{error}</div>
+        ) : (
+          <AssignmentsList assignments={assignments} />
+        )}
         <QuizzesList quizzes={quizzes} />
       </div>
 
@@ -231,7 +236,7 @@ const StudentDashboard = () => {
           </Link>
         </div>
       </section>
-    </StudentDashboardLayout>
+    </>
   );
 };
 

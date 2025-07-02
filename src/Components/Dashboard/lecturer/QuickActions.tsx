@@ -30,9 +30,9 @@ const QuickActions: React.FC = () => {
             : 'mb-8';
     };
 
-    const renderQuickAction = (title: string, bgClass: string, icon: React.ReactNode) => {
+    const renderQuickAction = (title: string, bgClass: string, icon: React.ReactNode, href: string) => {
         return (
-            <Link href="#" className={`${getBgClass(bgClass)} p-4 rounded-lg transition-all hover:-translate-y-1 flex flex-col items-center justify-center text-center text-white`}>
+            <Link href={href} className={`${getBgClass(bgClass)} p-4 rounded-lg transition-all hover:-translate-y-1 flex flex-col items-center justify-center text-center text-white`}>
                 <div className="p-2 bg-white/20 rounded-full mb-2">{icon}</div>
                 <span className="text-sm font-medium">{title}</span>
             </Link>
@@ -43,10 +43,10 @@ const QuickActions: React.FC = () => {
         <div className={getContainerStyle()}>
             <h3 className={`text-lg font-semibold mb-4 ${theme === 'light' ? 'text-slate-800' : 'text-gray-100'}`}>Quick Actions</h3>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                {renderQuickAction('Create New Course', 'bg-blue-600 hover:bg-blue-700', <PlusCircle size={20} />)}
-                {renderQuickAction('Upload Lesson', 'bg-green-600 hover:bg-green-700', <Upload size={20} />)}
-                {renderQuickAction('Create Quiz', 'bg-purple-600 hover:bg-purple-700', <FileText size={20} />)}
-                {renderQuickAction('Schedule Exam', 'bg-amber-600 hover:bg-amber-700', <Calendar size={20} />)}
+                {renderQuickAction('Create New Course', 'bg-blue-600 hover:bg-blue-700', <PlusCircle size={20} />, '/dashboard/lecturer/courses/create')}
+                {renderQuickAction('Upload Lesson', 'bg-green-600 hover:bg-green-700', <Upload size={20} />, '/dashboard/lecturer/lessons/create')}
+                {renderQuickAction('Create Quiz', 'bg-purple-600 hover:bg-purple-700', <FileText size={20} />, '/dashboard/lecturer/quizzes/create')}
+                {renderQuickAction('Schedule Exam', 'bg-amber-600 hover:bg-amber-700', <Calendar size={20} />, '/dashboard/lecturer/exams/create')}
             </div>
         </div>
     );

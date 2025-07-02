@@ -27,7 +27,7 @@ export const authOptions: NextAuthOptions = {
                 }
 
                 try {
-                    // Call your authentication API
+                    // Update the URL to include the /api prefix
                     const response = await fetch("http://localhost:8000/auth/login", {
                         method: "POST",
                         headers: { "Content-Type": "application/json" },

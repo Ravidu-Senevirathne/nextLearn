@@ -1,16 +1,20 @@
 export interface StatisticItem {
     title: string;
     value: string | number;
-    icon: React.ComponentType<any>;
+    icon: any;
     change: string;
     color: string;
 }
 
 export interface Event {
+    id: string;
     title: string;
     course: string;
     time: string;
-    type: string;
+    date: string;
+    type: 'quiz' | 'review' | 'live' | 'exam' | 'lesson' | 'deadline' | 'meeting';
+    location?: string;
+    description?: string;
 }
 
 export interface Submission {
@@ -27,4 +31,12 @@ export interface Course {
     students: number;
     completion: number;
     rating: number;
+}
+
+export interface CalendarEvent extends Event {
+    startTime: string;
+    endTime: string;
+    allDay?: boolean;
+    recurring?: boolean;
+    recurrencePattern?: string;
 }

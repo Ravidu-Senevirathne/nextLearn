@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import {
     Search,
@@ -19,70 +19,6 @@ import {
     CheckCircle
 } from 'lucide-react';
 import { useTheme } from '@/hooks/useTheme';
-
-// Sample course data - would be replaced with API call in production
-const courses = [
-    {
-        id: 1,
-        title: 'Web Development Fundamentals',
-        students: 156,
-        completion: 92,
-        rating: 4.8,
-        status: 'Published',
-        lastUpdated: '2023-07-15',
-        category: 'Development'
-    },
-    {
-        id: 2,
-        title: 'React Framework',
-        students: 132,
-        completion: 78,
-        rating: 4.7,
-        status: 'Published',
-        lastUpdated: '2023-07-10',
-        category: 'Development'
-    },
-    {
-        id: 3,
-        title: 'Data Science Essentials',
-        students: 98,
-        completion: 85,
-        rating: 4.9,
-        status: 'Published',
-        lastUpdated: '2023-07-05',
-        category: 'Data Science'
-    },
-    {
-        id: 4,
-        title: 'Mobile App Development',
-        students: 112,
-        completion: 65,
-        rating: 4.5,
-        status: 'Draft',
-        lastUpdated: '2023-07-01',
-        category: 'Development'
-    },
-    {
-        id: 5,
-        title: 'Python Programming',
-        students: 145,
-        completion: 88,
-        rating: 4.6,
-        status: 'Published',
-        lastUpdated: '2023-06-28',
-        category: 'Programming'
-    },
-    {
-        id: 6,
-        title: 'Machine Learning Fundamentals',
-        students: 78,
-        completion: 72,
-        rating: 4.7,
-        status: 'Published',
-        lastUpdated: '2023-06-20',
-        category: 'Data Science'
-    },
-];
 
 // Course categories for filtering
 const categories = [
@@ -109,6 +45,9 @@ const CoursesPage = () => {
     const [selectedStatus, setSelectedStatus] = useState('All Statuses');
     const [sortField, setSortField] = useState('title');
     const [sortDirection, setSortDirection] = useState('asc');
+    const [courses, setCourses] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState('');
 
     // Theme-based styling functions
     const getPageStyle = () => {
@@ -178,6 +117,36 @@ const CoursesPage = () => {
         }
     };
 
+    // Fetch courses from API
+    useEffect(() => {
+        const fetchCourses = async () => {
+            try {
+                setLoading(true);
+                const response = await fetch('http://localhost:8000/courses', {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    credentials: 'include',
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Error ${response.status}: ${response.statusText}`);
+                }
+
+                const data = await response.json();
+                setCourses(data);
+            } catch (err: any) {
+                console.error("Error fetching courses:", err);
+                setError(err.message || 'Failed to load courses');
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchCourses();
+    }, []);
+
     // Filter and sort courses
     const filteredCourses = courses
         .filter(course => {
@@ -209,6 +178,29 @@ const CoursesPage = () => {
             setSortDirection('asc');
         }
     };
+
+    // Add loading state
+    if (loading) {
+        return (
+            <div className={`p-6 ${getPageStyle()}`}>
+                <div className="flex justify-center items-center h-[60vh]">
+                    <div className="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+                </div>
+            </div>
+        );
+    }
+
+    // Add error state
+    if (error) {
+        return (
+            <div className={`p-6 ${getPageStyle()}`}>
+                <div className="bg-red-100 dark:bg-red-900/30 border border-red-400 dark:border-red-800 text-red-700 dark:text-red-300 px-4 py-3 rounded relative">
+                    <strong className="font-bold">Error: </strong>
+                    <span className="block sm:inline">{error}</span>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className={`p-6 ${getPageStyle()}`}>
@@ -471,3 +463,4 @@ const CoursesPage = () => {
 };
 
 export default CoursesPage;
+

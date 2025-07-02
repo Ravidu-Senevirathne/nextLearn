@@ -20,9 +20,16 @@ export interface Assignment {
     id: string;
     title: string;
     course: string;
+    courseId?: string;
     dueDate: string;
     status: 'pending' | 'submitted' | 'graded';
-    grade?: string;
+    description?: string;
+    totalPoints?: number;
+    attachments?: string[];
+    grade?: number;
+    feedback?: string;
+    submittedDate?: string;
+    waitingDays?: number; // For UI display
 }
 
 export interface Quiz {
