@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import {
@@ -15,30 +15,27 @@ import {
     X,
     ChevronUp,
     ChevronDown,
+    Loader2,
+    AlertCircle,
+    CheckCircle
 } from 'lucide-react';
+import { CreateQuizDto, QuizQuestion, QuizStatus, quizService } from '@/services/quizService';
 
-// Sample course data
-const courses = [
-    { id: '1', title: 'Web Development Fundamentals' },
-    { id: '2', title: 'Advanced JavaScript' },
-    { id: '3', title: 'Database Management' },
-    { id: '4', title: 'Backend Development' },
-];
-
-type QuestionType = 'multiple-choice' | 'true-false' | 'short-answer' | 'essay';
-
-interface Question {
+// Course interface
+interface Course {
     id: string;
-    type: QuestionType;
-    text: string;
-    options?: string[];
-    correctAnswer?: string | string[];
-    points: number;
+    title: string;
 }
 
 const CreateQuizPage = () => {
     const router = useRouter();
     const [activeSection, setActiveSection] = useState<'details' | 'questions'>('details');
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [submitError, setSubmitError] = useState<string | null>(null);
+    const [submitSuccess, setSubmitSuccess] = useState(false);
+    const [courses, setCourses] = useState<Course[]>([]);
+    const [coursesLoading, setCoursesLoading] = useState(true);
+    const [coursesError, setCoursesError] = useState<string | null>(null);
 
     // Quiz details state
     const [title, setTitle] = useState('');
@@ -53,26 +50,61 @@ const CreateQuizPage = () => {
     const [maxAttempts, setMaxAttempts] = useState(1);
 
     // Questions state
-    const [questions, setQuestions] = useState<Question[]>([
-        {
-            id: '1',
-            type: 'multiple-choice',
-            text: '',
-            options: ['', '', '', ''],
-            correctAnswer: [],
-            points: 1
-        }
-    ]);
+    const [questions, setQuestions] = useState<QuizQuestion[]>(
+        [
+            {
+                id: '1',
+                type: 'multiple-choice',
+                text: '',
+                options: ['', '', '', ''],
+                correctAnswer: [],
+                points: 1,
+                order: 0
+            }
+        ]
+    );
 
     const [questionErrors, setQuestionErrors] = useState<{ [key: string]: string }>({});
 
+    // Fetch courses on component mount
+    useEffect(() => {
+        const fetchCourses = async () => {
+            try {
+                setCoursesLoading(true);
+                const response = await fetch('http://localhost:8000/courses', {
+                    credentials: 'include',
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to fetch courses');
+                }
+
+                const data = await response.json();
+                setCourses(data);
+                setCoursesError(null);
+            } catch (error) {
+                console.error('Error fetching courses:', error);
+                setCoursesError('Failed to load courses. Please try again later.');
+            } finally {
+                setCoursesLoading(false);
+            }
+        };
+
+        fetchCourses();
+    }, []);
+
     // Add a new question
-    const addQuestion = (type: QuestionType) => {
-        const newQuestion: Question = {
-            id: (questions.length + 1).toString(),
+    const addQuestion = (type: 'multiple-choice' | 'true-false' | 'short-answer' | 'essay') => {
+        // Ensure unique string id for each question
+        const newId = (questions.length > 0
+            ? (Math.max(...questions.map(q => parseInt(q.id || '0'))) + 1).toString()
+            : '1');
+        const newQuestion: QuizQuestion = {
+            id: newId,
             type,
             text: '',
             points: 1,
+            order: questions.length
         };
 
         if (type === 'multiple-choice') {
@@ -88,7 +120,13 @@ const CreateQuizPage = () => {
 
     // Remove a question
     const removeQuestion = (id: string) => {
-        setQuestions(questions.filter(q => q.id !== id));
+        const updatedQuestions = questions.filter(q => q.id !== id);
+        // Update order for remaining questions
+        updatedQuestions.forEach((q, index) => {
+            q.order = index;
+        });
+        setQuestions(updatedQuestions);
+
         // Remove any errors for this question
         const newErrors = { ...questionErrors };
         delete newErrors[id];
@@ -164,7 +202,15 @@ const CreateQuizPage = () => {
 
         const newQuestions = [...questions];
         const newIndex = direction === 'up' ? index - 1 : index + 1;
+
+        // Swap order property
+        const orderTemp = newQuestions[index].order;
+        newQuestions[index].order = newQuestions[newIndex].order;
+        newQuestions[newIndex].order = orderTemp;
+
+        // Swap positions in array
         [newQuestions[index], newQuestions[newIndex]] = [newQuestions[newIndex], newQuestions[index]];
+
         setQuestions(newQuestions);
     };
 
@@ -245,32 +291,48 @@ const CreateQuizPage = () => {
     };
 
     // Handle quiz submission
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent, status: QuizStatus = 'draft') => {
         e.preventDefault();
 
-        if (!validateQuestions()) {
+        if (!validateDetails() || !validateQuestions()) {
             return;
         }
 
-        // Create quiz object
-        const quizData = {
-            title,
-            description,
-            courseId,
-            duration: isTimeLimited ? duration : null,
-            dueDate: dueDate || null,
-            passingScore,
-            shuffleQuestions,
-            showCorrectAnswers,
-            maxAttempts,
-            questions,
-        };
+        setIsSubmitting(true);
+        setSubmitError(null);
 
-        console.log('Quiz data to be submitted:', quizData);
-        // Here you would typically make an API call to save the quiz
+        try {
+            // Create quiz object matching backend DTO
+            const quizData: CreateQuizDto = {
+                title,
+                description: description || '',
+                courseId: courseId || '', // This should be validated before submission
+                duration: isTimeLimited ? duration : undefined,
+                dueDate: dueDate ? new Date(dueDate) : undefined,
+                passingScore,
+                shuffleQuestions,
+                showCorrectAnswers,
+                maxAttempts,
+                questions,
+                status
+            };
 
-        alert('Quiz created successfully!');
-        router.push('/dashboard/lecturer/quizzes');
+            // Submit to the backend
+            const result = await quizService.createQuiz(quizData);
+
+            console.log('Quiz created successfully:', result);
+            setSubmitSuccess(true);
+
+            // Redirect after a short delay
+            setTimeout(() => {
+                router.push('/dashboard/lecturer/quizzes');
+            }, 1500);
+        } catch (error) {
+            console.error('Error creating quiz:', error);
+            setSubmitError('Failed to create quiz. Please try again later.');
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
     return (
@@ -292,20 +354,48 @@ const CreateQuizPage = () => {
                     <button
                         onClick={() => router.push('/dashboard/lecturer/quizzes')}
                         className="flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                        disabled={isSubmitting}
                     >
                         <X size={18} className="mr-1" />
                         Cancel
                     </button>
 
                     <button
-                        onClick={handleSubmit}
-                        className="flex items-center px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 transition-colors"
+                        onClick={(e) => handleSubmit(e, 'active')}
+                        className="flex items-center px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 transition-colors disabled:opacity-50"
+                        disabled={isSubmitting}
                     >
-                        <Save size={18} className="mr-1" />
-                        Save Quiz
+                        {isSubmitting ? (
+                            <>
+                                <Loader2 size={18} className="mr-1 animate-spin" /> Saving...
+                            </>
+                        ) : (
+                            <>
+                                <Save size={18} className="mr-1" /> Save & Publish Quiz
+                            </>
+                        )}
                     </button>
                 </div>
             </div>
+
+            {/* Status notifications */}
+            {submitSuccess && (
+                <div className="mb-6 p-4 rounded-lg bg-green-100 dark:bg-green-900/30 border border-green-200 dark:border-green-800 text-green-800 dark:text-green-200">
+                    <div className="flex items-center">
+                        <CheckCircle size={18} className="mr-2" />
+                        <p>Quiz created successfully! Redirecting...</p>
+                    </div>
+                </div>
+            )}
+
+            {submitError && (
+                <div className="mb-6 p-4 rounded-lg bg-red-100 dark:bg-red-900/30 border border-red-200 dark:border-red-800 text-red-800 dark:text-red-200">
+                    <div className="flex items-center">
+                        <AlertCircle size={18} className="mr-2" />
+                        <p>{submitError}</p>
+                    </div>
+                </div>
+            )}
 
             {/* Progress steps */}
             <div className="mb-8">
@@ -372,17 +462,27 @@ const CreateQuizPage = () => {
                                 </label>
                                 <div className="flex items-center">
                                     <BookOpen size={18} className="text-gray-400 mr-2" />
-                                    <select
-                                        id="course"
-                                        className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800"
-                                        value={courseId}
-                                        onChange={(e) => setCourseId(e.target.value)}
-                                    >
-                                        <option value="">Select a course</option>
-                                        {courses.map(course => (
-                                            <option key={course.id} value={course.id}>{course.title}</option>
-                                        ))}
-                                    </select>
+                                    {coursesLoading ? (
+                                        <div className="w-full flex items-center p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800">
+                                            <Loader2 size={16} className="mr-2 animate-spin" /> Loading courses...
+                                        </div>
+                                    ) : coursesError ? (
+                                        <div className="w-full p-2 border border-red-300 dark:border-red-600 rounded-md bg-white dark:bg-gray-800 text-red-500">
+                                            {coursesError}
+                                        </div>
+                                    ) : (
+                                        <select
+                                            id="course"
+                                            className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800"
+                                            value={courseId}
+                                            onChange={(e) => setCourseId(e.target.value)}
+                                        >
+                                            <option value="">Select a course</option>
+                                            {courses.map(course => (
+                                                <option key={course.id} value={course.id}>{course.title}</option>
+                                            ))}
+                                        </select>
+                                    )}
                                 </div>
                             </div>
 
@@ -504,24 +604,28 @@ const CreateQuizPage = () => {
                             </label>
                             <div className="flex flex-wrap gap-2">
                                 <button
+                                    type="button"
                                     onClick={() => addQuestion('multiple-choice')}
                                     className="px-3 py-1 bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300 rounded-md hover:bg-blue-200 dark:hover:bg-blue-800/40 text-sm flex items-center"
                                 >
                                     <Plus size={16} className="mr-1" /> Multiple Choice
                                 </button>
                                 <button
+                                    type="button"
                                     onClick={() => addQuestion('true-false')}
                                     className="px-3 py-1 bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300 rounded-md hover:bg-green-200 dark:hover:bg-green-800/40 text-sm flex items-center"
                                 >
                                     <Plus size={16} className="mr-1" /> True/False
                                 </button>
                                 <button
+                                    type="button"
                                     onClick={() => addQuestion('short-answer')}
                                     className="px-3 py-1 bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300 rounded-md hover:bg-amber-200 dark:hover:bg-amber-800/40 text-sm flex items-center"
                                 >
                                     <Plus size={16} className="mr-1" /> Short Answer
                                 </button>
                                 <button
+                                    type="button"
                                     onClick={() => addQuestion('essay')}
                                     className="px-3 py-1 bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300 rounded-md hover:bg-purple-200 dark:hover:bg-purple-800/40 text-sm flex items-center"
                                 >
@@ -549,22 +653,25 @@ const CreateQuizPage = () => {
 
                                         <div className="flex space-x-1">
                                             <button
+                                                type="button"
                                                 title="Move up"
-                                                onClick={() => moveQuestion(question.id, 'up')}
+                                                onClick={() => moveQuestion(question.id ?? '', 'up')}
                                                 disabled={index === 0}
                                                 className="p-1 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 disabled:opacity-30"
                                             >
                                                 <ChevronUp size={18} />
                                             </button>
                                             <button
+                                                type="button"
                                                 title="Move down"
-                                                onClick={() => moveQuestion(question.id, 'down')}
+                                                onClick={() => moveQuestion(question.id ?? '', 'down')}
                                                 disabled={index === questions.length - 1}
                                                 className="p-1 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 disabled:opacity-30"
                                             >
                                                 <ChevronDown size={18} />
                                             </button>
                                             <button
+                                                type="button"
                                                 title="Remove question"
                                                 onClick={() => removeQuestion(question.id)}
                                                 className="p-1 text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
@@ -719,18 +826,36 @@ const CreateQuizPage = () => {
 
                         <div className="mt-8 flex justify-between">
                             <button
+                                type="button"
                                 onClick={() => setActiveSection('details')}
                                 className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
                             >
                                 Back to Details
                             </button>
-                            <button
-                                onClick={handleSubmit}
-                                className="px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 transition-colors"
-                                disabled={questions.length === 0}
-                            >
-                                Save Quiz
-                            </button>
+                            <div className="space-x-2">
+                                <button
+                                    type="button"
+                                    onClick={(e) => handleSubmit(e, 'draft')}
+                                    className="px-4 py-2 border border-purple-500 text-purple-500 rounded-md hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-colors"
+                                    disabled={isSubmitting}
+                                >
+                                    Save as Draft
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={(e) => handleSubmit(e, 'active')}
+                                    className="px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 transition-colors"
+                                    disabled={questions.length === 0 || isSubmitting}
+                                >
+                                    {isSubmitting ? (
+                                        <>
+                                            <Loader2 size={16} className="mr-1 inline animate-spin" /> Saving...
+                                        </>
+                                    ) : (
+                                        'Publish Quiz'
+                                    )}
+                                </button>
+                            </div>
                         </div>
                     </div>
                 )}

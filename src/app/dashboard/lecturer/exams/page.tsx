@@ -1,7 +1,8 @@
 "use client";
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
+import { examService } from '@/services/examService';
 import {
     BookOpen,
     Filter,
@@ -25,105 +26,51 @@ import {
     DropdownMenuTrigger,
 } from '@/Components/ui/dropdown-menu';
 
-// Sample exam data
-interface Exam {
-    id: string;
-    title: string;
-    courseTitle: string;
-    date: string;
-    time: string;
-    duration: number;
-    status: 'published' | 'draft' | 'completed';
-    submissionCount: number;
-    totalStudents: number;
-}
-
-const exams: Exam[] = [
-    {
-        id: '1',
-        title: 'Mid-Term Examination',
-        courseTitle: 'Web Development Fundamentals',
-        date: '2023-07-25',
-        time: '10:00 AM',
-        duration: 90,
-        status: 'published',
-        submissionCount: 45,
-        totalStudents: 58
-    },
-    {
-        id: '2',
-        title: 'Final Examination',
-        courseTitle: 'Web Development Fundamentals',
-        date: '2023-08-15',
-        time: '2:00 PM',
-        duration: 120,
-        status: 'draft',
-        submissionCount: 0,
-        totalStudents: 58
-    },
-    {
-        id: '3',
-        title: 'JavaScript Concepts Quiz',
-        courseTitle: 'Advanced JavaScript',
-        date: '2023-07-20',
-        time: '3:30 PM',
-        duration: 60,
-        status: 'completed',
-        submissionCount: 32,
-        totalStudents: 45
-    },
-    {
-        id: '4',
-        title: 'Database Design Examination',
-        courseTitle: 'Backend Development',
-        date: '2023-07-28',
-        time: '11:00 AM',
-        duration: 90,
-        status: 'published',
-        submissionCount: 0,
-        totalStudents: 37
-    },
-    {
-        id: '5',
-        title: 'User Research Methods Quiz',
-        courseTitle: 'UI/UX Design Principles',
-        date: '2023-08-05',
-        time: '10:00 AM',
-        duration: 45,
-        status: 'draft',
-        submissionCount: 0,
-        totalStudents: 52
-    },
-    {
-        id: '6',
-        title: 'Mid-Term Examination',
-        courseTitle: 'Advanced JavaScript',
-        date: '2023-07-15',
-        time: '1:00 PM',
-        duration: 90,
-        status: 'completed',
-        submissionCount: 41,
-        totalStudents: 45
-    },
-];
-
 const ExamsPage = () => {
     const { theme } = useTheme();
     const [searchTerm, setSearchTerm] = useState('');
     const [statusFilter, setStatusFilter] = useState<'all' | 'published' | 'draft' | 'completed'>('all');
+    const [exams, setExams] = useState<any[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
+
+    // Load exams on component mount
+    useEffect(() => {
+        const loadExams = async () => {
+            try {
+                const fetchedExams = await examService.getExams();
+                setExams(fetchedExams.map(exam => ({
+                    ...exam,
+                    date: new Date(exam.date).toISOString().split('T')[0],
+                    time: new Date(exam.date).toLocaleTimeString('en-US', {
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    }),
+                    // Add mock data for submission counts (replace with real data from your API)
+                    submissionCount: exam.status === 'completed' ? Math.floor(Math.random() * 50) : 0,
+                    totalStudents: Math.floor(Math.random() * 60) + 20
+                })));
+            } catch (error) {
+                console.error('Failed to load exams:', error);
+                // Handle error (e.g., show toast notification)
+            } finally {
+                setIsLoading(false);
+            }
+        };
+        loadExams();
+    }, []);
 
     // Filter exams based on search term and status filter
     const filteredExams = useMemo(() => {
         return exams.filter(exam => {
             const matchesSearch =
                 exam.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                exam.courseTitle.toLowerCase().includes(searchTerm.toLowerCase());
+                (exam.course?.title?.toLowerCase().includes(searchTerm.toLowerCase()) || false);
 
             const matchesStatus = statusFilter === 'all' || exam.status === statusFilter;
 
             return matchesSearch && matchesStatus;
         });
-    }, [searchTerm, statusFilter]);
+    }, [searchTerm, statusFilter, exams]);
 
     const getStatusClass = (status: string) => {
         switch (status) {
@@ -148,6 +95,17 @@ const ExamsPage = () => {
                 return <CheckCircle size={14} className="mr-1" />;
             default:
                 return null;
+        }
+    };
+
+    const handleDeleteExam = async (id: string) => {
+        if (!confirm('Are you sure you want to delete this exam?')) return;
+        try {
+            await examService.deleteExam(id);
+            setExams(exams.filter(exam => exam.id !== id));
+        } catch (error) {
+            console.error('Failed to delete exam:', error);
+            // Show error to user
         }
     };
 
@@ -185,8 +143,8 @@ const ExamsPage = () => {
                     <input
                         type="text"
                         className={`pl-10 pr-4 py-2 w-full rounded-md border ${theme === 'dark'
-                                ? 'bg-gray-700 border-gray-600 text-white placeholder:text-gray-400'
-                                : 'bg-white border-gray-300 text-gray-900 placeholder:text-gray-500'
+                            ? 'bg-gray-700 border-gray-600 text-white placeholder:text-gray-400'
+                            : 'bg-white border-gray-300 text-gray-900 placeholder:text-gray-500'
                             } focus:outline-none focus:ring-2 ${theme === 'dark' ? 'focus:ring-blue-500' : 'focus:ring-teal-500'
                             }`}
                         placeholder="Search exams..."
@@ -204,8 +162,8 @@ const ExamsPage = () => {
                         value={statusFilter}
                         onChange={(e) => setStatusFilter(e.target.value as any)}
                         className={`py-2 px-3 rounded-md border ${theme === 'dark'
-                                ? 'bg-gray-700 border-gray-600 text-white'
-                                : 'bg-white border-gray-300 text-gray-900'
+                            ? 'bg-gray-700 border-gray-600 text-white'
+                            : 'bg-white border-gray-300 text-gray-900'
                             } focus:outline-none focus:ring-2 ${theme === 'dark' ? 'focus:ring-blue-500' : 'focus:ring-teal-500'
                             } [&>option]:text-black ${theme === 'dark' && '[&>option]:bg-gray-700 [&>option]:text-white'
                             }`}
@@ -307,7 +265,13 @@ const ExamsPage = () => {
                     </thead>
                     <tbody className={`${theme === 'dark' ? 'divide-y divide-gray-700' : 'divide-y divide-gray-200'
                         }`}>
-                        {filteredExams.length > 0 ? (
+                        {isLoading ? (
+                            <tr>
+                                <td colSpan={7} className="px-6 py-12 text-center text-sm">
+                                    Loading exams...
+                                </td>
+                            </tr>
+                        ) : filteredExams.length > 0 ? (
                             filteredExams.map((exam) => (
                                 <tr
                                     key={exam.id}
@@ -321,7 +285,7 @@ const ExamsPage = () => {
                                         }`}>
                                         <div className="flex items-center">
                                             <BookOpen size={14} className="mr-1" />
-                                            {exam.courseTitle}
+                                            {exam.course?.title}
                                         </div>
                                     </td>
                                     <td className={`px-6 py-4 whitespace-nowrap ${theme === 'dark' ? 'text-gray-300' : 'text-gray-500'
@@ -393,7 +357,10 @@ const ExamsPage = () => {
                                                     </Link>
                                                 )}
                                                 {exam.status !== 'completed' && (
-                                                    <DropdownMenuItem className="cursor-pointer text-red-500">
+                                                    <DropdownMenuItem
+                                                        className="cursor-pointer text-red-500"
+                                                        onClick={() => handleDeleteExam(exam.id)}
+                                                    >
                                                         <XCircle size={14} className="mr-2" />
                                                         Delete
                                                     </DropdownMenuItem>
@@ -427,8 +394,8 @@ const ExamsPage = () => {
                                             <Link href="/dashboard/lecturer/exams/create">
                                                 <Button
                                                     className={`mt-3 ${theme === 'dark'
-                                                            ? 'bg-blue-600 hover:bg-blue-700 text-white'
-                                                            : 'bg-teal-600 hover:bg-teal-700 text-white'
+                                                        ? 'bg-blue-600 hover:bg-blue-700 text-white'
+                                                        : 'bg-teal-600 hover:bg-teal-700 text-white'
                                                         }`}
                                                     size="sm"
                                                 >
@@ -473,5 +440,6 @@ const ExamsPage = () => {
         </div>
     );
 };
+
 
 export default ExamsPage;

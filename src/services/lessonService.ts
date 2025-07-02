@@ -1,5 +1,6 @@
 // Define base API URL
-const API_URL = 'http://localhost:8000/lessons';
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+const LESSONS_ENDPOINT = `${API_URL}/lessons`;
 
 // Update interface to match API expectations
 export interface CreateLessonParams {
@@ -42,7 +43,7 @@ export interface Lesson {
 
 export const lessonService = {
     async getAll(courseId?: string): Promise<Lesson[]> {
-        const url = courseId ? `${API_URL}?courseId=${courseId}` : API_URL;
+        const url = courseId ? `${LESSONS_ENDPOINT}?courseId=${courseId}` : LESSONS_ENDPOINT;
         const response = await fetch(url, {
             credentials: 'include',
         });
@@ -55,7 +56,7 @@ export const lessonService = {
     },
 
     async getById(id: string): Promise<Lesson> {
-        const response = await fetch(`${API_URL}/${id}`, {
+        const response = await fetch(`${LESSONS_ENDPOINT}/${id}`, {
             credentials: 'include',
         });
 
@@ -94,7 +95,7 @@ export const lessonService = {
 
         // Make the request
         try {
-            const response = await fetch(API_URL, {
+            const response = await fetch(LESSONS_ENDPOINT, {
                 method: 'POST',
                 body: formData,
                 credentials: 'include',
@@ -139,7 +140,7 @@ export const lessonService = {
             formData.append('documentFile', lessonData.documentFile);
         }
 
-        const response = await fetch(`${API_URL}/${id}`, {
+        const response = await fetch(`${LESSONS_ENDPOINT}/${id}`, {
             method: 'PUT',
             body: formData,
             credentials: 'include',
@@ -154,7 +155,7 @@ export const lessonService = {
     },
 
     async deleteLesson(id: string): Promise<void> {
-        const response = await fetch(`${API_URL}/${id}`, {
+        const response = await fetch(`${LESSONS_ENDPOINT}/${id}`, {
             method: 'DELETE',
             credentials: 'include',
         });

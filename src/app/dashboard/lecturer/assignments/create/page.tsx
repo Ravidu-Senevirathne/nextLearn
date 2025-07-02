@@ -59,7 +59,7 @@ export default function CreateAssignmentPage() {
                 if (!isConnected) {
                     setCoursesError('Backend server not available. Using offline course list.');
                     // Load fallback courses if available
-                    
+
                     return;
                 }
 
@@ -73,8 +73,8 @@ export default function CreateAssignmentPage() {
                 console.error('Error fetching courses:', error);
                 setBackendStatus('disconnected');
                 setCoursesError('Failed to load courses. Please refresh the page.');
-                
-               
+
+
             } finally {
                 setLoadingCourses(false);
             }
@@ -210,11 +210,11 @@ export default function CreateAssignmentPage() {
 
             {/* Backend Status Indicator */}
             {backendStatus !== 'checking' && (
-                <div className={`mb-4 p-2 text-sm rounded-md ${backendStatus === 'connected' 
-                    ? (theme === 'dark' ? 'bg-green-900/30 text-green-300' : 'bg-green-50 text-green-800') 
+                <div className={`mb-4 p-2 text-sm rounded-md ${backendStatus === 'connected'
+                    ? (theme === 'dark' ? 'bg-green-900/30 text-green-300' : 'bg-green-50 text-green-800')
                     : (theme === 'dark' ? 'bg-amber-900/30 text-amber-300' : 'bg-amber-50 text-amber-800')}`}>
-                    {backendStatus === 'connected' 
-                        ? 'Connected to backend server' 
+                    {backendStatus === 'connected'
+                        ? 'Connected to backend server'
                         : 'Working in offline mode - some features may be limited'}
                 </div>
             )}
@@ -535,13 +535,12 @@ export default function CreateAssignmentPage() {
                             <button
                                 type="submit"
                                 disabled={isSubmitting}
-                                className={`px-4 py-2 rounded-md text-white transition-colors flex items-center justify-center min-w-32 ${
-                                    isSubmitting 
-                                        ? (theme === 'dark' ? 'bg-blue-800' : 'bg-teal-700') 
-                                        : (theme === 'dark' 
-                                            ? 'bg-blue-600 hover:bg-blue-700' 
+                                className={`px-4 py-2 rounded-md text-white transition-colors flex items-center justify-center min-w-32 ${isSubmitting
+                                        ? (theme === 'dark' ? 'bg-blue-800' : 'bg-teal-700')
+                                        : (theme === 'dark'
+                                            ? 'bg-blue-600 hover:bg-blue-700'
                                             : 'bg-teal-600 hover:bg-teal-700')
-                                }`}
+                                    }`}
                             >
                                 {isSubmitting ? (
                                     <>

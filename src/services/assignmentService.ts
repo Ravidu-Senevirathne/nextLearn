@@ -63,14 +63,6 @@ export const assignmentService = {
     // Get all courses for dropdown
     async getAllCourses(): Promise<Course[]> {
         try {
-            // First check if backend is available
-            const healthCheck = await this.checkBackendHealth();
-            if (!healthCheck) {
-                console.warn('Backend not available, using fallback data');
-                // Return empty array or fallback data if backend is not available
-                return [];
-            }
-
             const response = await fetch(`${API_BASE_URL}/courses`, {
                 method: 'GET',
                 headers: {
@@ -315,6 +307,14 @@ export const assignmentService = {
 
             return response.json();
         } catch (error) {
+            console.error('Error uploading assignment files:', error);
+            if (error instanceof Error) {
+                throw error;
+            }
+            throw new Error('Failed to upload assignment files');
+        }
+    },
+};
             console.error('Error uploading assignment files:', error);
             if (error instanceof Error) {
                 throw error;

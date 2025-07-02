@@ -1,11 +1,12 @@
 import { Assignment } from '@/Components/Dashboard/student/types';
 
-const API_URL = 'http://localhost:8000/assignments';
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+const ASSIGNMENTS_ENDPOINT = `${API_URL}/assignments`;
 
 export const studentAssignmentService = {
     // Get all assignments for a student
     async getAll(): Promise<Assignment[]> {
-        const response = await fetch(`${API_URL}`, {
+        const response = await fetch(`${ASSIGNMENTS_ENDPOINT}`, {
             credentials: 'include',
         });
 

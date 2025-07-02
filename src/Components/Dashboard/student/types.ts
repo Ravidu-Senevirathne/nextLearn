@@ -36,11 +36,17 @@ export interface Quiz {
     id: string;
     title: string;
     course: string;
+    courseId?: string;
     dueDate: string;
     questions: number;
     duration?: string;
     status: 'pending' | 'completed' | 'expired';
     score?: string;
+    description?: string;
+    passingScore?: number;
+    shuffleQuestions?: boolean;
+    showCorrectAnswers?: boolean;
+    maxAttempts?: number;
 }
 
 export interface Notification {

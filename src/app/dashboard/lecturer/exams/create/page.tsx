@@ -1,8 +1,9 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { examService } from '@/services/examService';
 import {
     ArrowLeft,
     Clock,
@@ -45,14 +46,6 @@ import { Switch } from '@/Components/ui/switch';
 import { Label } from '@/Components/ui/label';
 import { Separator } from '@/Components/ui/separator';
 
-// Sample courses data for the dropdown
-const courses = [
-    { id: "1", title: "Web Development Fundamentals" },
-    { id: "2", title: "Advanced JavaScript" },
-    { id: "3", title: "Backend Development" },
-    { id: "4", title: "UI/UX Design Principles" }
-];
-
 // Question types
 const questionTypes = [
     { value: "multiple_choice", label: "Multiple Choice" },
@@ -67,11 +60,31 @@ interface Question {
     text: string;
     options?: { id: string; text: string; isCorrect: boolean }[];
     marks: number;
+    order: number;
 }
 
 const CreateExamPage = () => {
     const { theme } = useTheme();
     const router = useRouter();
+    const [courses, setCourses] = useState<{ id: string; title: string }[]>([]);
+    const [isLoading, setIsLoading] = useState(false);
+
+    // Load courses on component mount
+    useEffect(() => {
+        const loadCourses = async () => {
+            try {
+                const fetchedCourses = await examService.getAllCourses();
+                setCourses(fetchedCourses.map(course => ({
+                    id: course.id,
+                    title: course.title
+                })));
+            } catch (error) {
+                console.error('Failed to load courses:', error);
+                // Handle error (e.g., show toast notification)
+            }
+        };
+        loadCourses();
+    }, []);
 
     // Basic exam details
     const [examData, setExamData] = useState({
@@ -80,9 +93,8 @@ const CreateExamPage = () => {
         description: '',
         instructions: '',
         duration: 60,
-        date: '',
-        time: '',
-        totalMarks: 100,
+        date: new Date().toISOString().split('T')[0], // Default to today's date
+        time: '10:00',
         passingPercentage: 60,
         shuffleQuestions: false,
         showResults: true,
@@ -99,16 +111,22 @@ const CreateExamPage = () => {
             { id: '1', text: '', isCorrect: false },
             { id: '2', text: '', isCorrect: false }
         ],
-        marks: 10
+        marks: 10,
+        order: 1
     });
 
     const addQuestion = () => {
-        // Add current question to the list and create a new empty one
-        setQuestions([...questions, currentQuestion]);
+        if (!currentQuestion.text.trim()) return;
 
-        // Generate new IDs
-        const newQuestionId = (questions.length + 2).toString();
+        const newQuestions = [...questions, {
+            ...currentQuestion,
+            order: questions.length + 1
+        }];
 
+        setQuestions(newQuestions);
+
+        // Generate new question
+        const newQuestionId = (newQuestions.length + 1).toString();
         setCurrentQuestion({
             id: newQuestionId,
             type: 'multiple_choice',
@@ -117,7 +135,8 @@ const CreateExamPage = () => {
                 { id: '1', text: '', isCorrect: false },
                 { id: '2', text: '', isCorrect: false }
             ],
-            marks: 10
+            marks: 10,
+            order: newQuestions.length + 1
         });
     };
 
@@ -236,25 +255,70 @@ const CreateExamPage = () => {
     };
 
     const calculateTotalMarks = () => {
-        return questions.reduce((sum, question) => sum + question.marks, 0) + currentQuestion.marks;
+        const currentQuestionMarks = currentQuestion.text.trim() ? currentQuestion.marks : 0;
+        return questions.reduce((sum, question) => sum + question.marks, currentQuestionMarks);
     };
 
-    const saveExam = (status: 'draft' | 'published') => {
-        // Include the current question if it has content
-        const allQuestions = currentQuestion.text.trim() !== '' ?
-            [...questions, currentQuestion] : questions;
+    const saveExam = async (status: 'draft' | 'published') => {
+        if (!examData.title || !examData.courseId || !examData.date || !examData.time) {
+            // Show error to user
+            return;
+        }
 
-        const finalExamData = {
-            ...examData,
-            status,
-            questions: allQuestions,
-            totalMarks: calculateTotalMarks()
-        };
+        if (questions.length === 0 && !currentQuestion.text.trim()) {
+            // Show error - need at least one question
+            return;
+        }
 
-        console.log('Saving exam:', finalExamData);
-        // Here you would call your API to save the exam
-        // For now we'll just redirect back to the exams list
-        router.push('/dashboard/lecturer/exams');
+        setIsLoading(true);
+
+        try {
+            // Include the current question if it has content
+            const allQuestions = currentQuestion.text.trim() !== '' ?
+                [...questions, currentQuestion] : questions;
+
+            // Format date and time
+            const examDateTime = new Date(`${examData.date}T${examData.time}`);
+            if (isNaN(examDateTime.getTime())) {
+                throw new Error('Invalid date/time format');
+            }
+
+            const examToSave = {
+                title: examData.title,
+                courseId: examData.courseId,
+                description: examData.description,
+                instructions: examData.instructions,
+                date: examDateTime,
+                duration: examData.duration,
+                passingPercentage: examData.passingPercentage,
+                shuffleQuestions: examData.shuffleQuestions,
+                showResults: examData.showResults,
+                status,
+                questions: allQuestions.map(q => ({
+                    text: q.text,
+                    type: q.type,
+                    marks: q.marks,
+                    order: q.order,
+                    options: q.options?.map(opt => ({
+                        text: opt.text,
+                        isCorrect: opt.isCorrect
+                    })) || []
+                }))
+            };
+
+            const savedExam = await examService.createExam(examToSave);
+
+            if (status === 'published') {
+                await examService.publishExam(savedExam.id);
+            }
+
+            router.push('/dashboard/lecturer/exams');
+        } catch (error) {
+            console.error('Error saving exam:', error);
+            // Show error to user
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     return (
@@ -729,18 +793,20 @@ const CreateExamPage = () => {
                             <Button
                                 className={`w-full ${theme === 'dark' ? 'bg-blue-600 hover:bg-blue-700' : 'bg-teal-600 hover:bg-teal-700'
                                     }`}
-                                disabled={!examData.title || !examData.courseId || !examData.date || !examData.time || questions.length === 0}
+                                disabled={isLoading || !examData.title || !examData.courseId || !examData.date || !examData.time || questions.length === 0}
                                 onClick={() => saveExam('published')}
                             >
-                                <CheckCircle size={16} className="mr-2" /> Publish Exam
+                                <CheckCircle size={16} className="mr-2" />
+                                {isLoading ? 'Publishing...' : 'Publish Exam'}
                             </Button>
 
                             <Button
                                 variant="outline"
                                 className={`w-full ${theme === 'dark' ? 'border-gray-600 text-gray-300 hover:bg-gray-700' : ''}`}
+                                disabled={isLoading}
                                 onClick={() => saveExam('draft')}
                             >
-                                Save as Draft
+                                {isLoading ? 'Saving...' : 'Save as Draft'}
                             </Button>
                         </CardFooter>
                     </Card>
