@@ -1,6 +1,6 @@
 "use client";
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { BookOpen, Users, FileText, CheckCircle } from 'lucide-react';
 import StatCard from '@/Components/Dashboard/lecturer/StatCard';
 import QuickActions from '@/Components/Dashboard/lecturer/QuickActions';
@@ -8,6 +8,7 @@ import EventsList from '@/Components/Dashboard/lecturer/EventsList';
 import SubmissionsList from '@/Components/Dashboard/lecturer/SubmissionsList';
 import CoursesList from '@/Components/Dashboard/lecturer/CoursesList';
 import { StatisticItem, Event, Submission, Course } from '@/Components/Dashboard/lecturer/types';
+import { assignmentService } from '@/services/assignmentService';
 
 // Sample data - will be replaced with real data from API
 const statistics: StatisticItem[] = [
@@ -17,11 +18,11 @@ const statistics: StatisticItem[] = [
   { title: 'Completion Rate', value: '87%', icon: CheckCircle, change: '+3%', color: 'bg-purple-500' },
 ];
 
-const upcomingEvents: Event[] = [
-  { title: 'Web Development Quiz Deadline', course: 'Web Development Fundamentals', time: 'Today, 11:59 PM', type: 'quiz' },
-  { title: 'Data Science Project Review', course: 'Data Science Essentials', time: 'Tomorrow, 3:00 PM', type: 'review' },
-  { title: 'Mobile App Dev Live Session', course: 'Mobile App Development', time: 'Jul 24, 2:00 PM', type: 'live' },
-  { title: 'Final Exam', course: 'JavaScript Mastery', time: 'Jul 29, 10:00 AM', type: 'exam' },
+const upcomingEvents = [
+  { title: 'Web Development Quiz Deadline', course: 'Web Development Fundamentals', time: 'Today, 11:59 PM', type: 'quiz' as const },
+  { title: 'Data Science Project Review', course: 'Data Science Essentials', time: 'Tomorrow, 3:00 PM', type: 'review' as const },
+  { title: 'Mobile App Dev Live Session', course: 'Mobile App Development', time: 'Jul 24, 2:00 PM', type: 'live' as const },
+  { title: 'Final Exam', course: 'JavaScript Mastery', time: 'Jul 29, 10:00 AM', type: 'exam' as const },
 ];
 
 const recentSubmissions: Submission[] = [
@@ -44,6 +45,28 @@ const popularCourses: Course[] = [
  * assignments, and view statistics
  */
 const LecturerDashboard = () => {
+  const [assignmentsCount, setAssignmentsCount] = useState(0);
+  const [loading, setLoading] = useState(true);
+
+  // Fetch assignments count for real-time statistics
+  useEffect(() => {
+    const fetchAssignmentsCount = async () => {
+      try {
+        const assignments = await assignmentService.getAllAssignments();
+        setAssignmentsCount(assignments.length);
+
+        // Update the statistics with real data
+        statistics[2].value = assignments.length;
+      } catch (error) {
+        console.error('Error fetching assignments:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchAssignmentsCount();
+  }, []);
+
   return (
     <>
       {/* Welcome section */}

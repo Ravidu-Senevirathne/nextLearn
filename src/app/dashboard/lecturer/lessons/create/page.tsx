@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, FormEvent, ChangeEvent } from 'react';
+import { useState, FormEvent, ChangeEvent, useEffect } from 'react';
 import {
     BookOpen, Save, ArrowLeft, FileText, Video, Upload, Eye,
     X, HelpCircle, AlertTriangle
@@ -8,6 +8,8 @@ import {
 import Link from 'next/link';
 import { useTheme } from '@/hooks/useTheme';
 import { Button } from '@/Components/ui/button';
+import { useRouter } from 'next/navigation';
+import { lessonService } from '@/services/lessonService';
 
 // Define the structure for form errors
 interface FormErrors {
@@ -18,8 +20,14 @@ interface FormErrors {
     documentFile?: string;
 }
 
+interface Course {
+    id: string;
+    title: string;
+}
+
 export default function CreateLessonPage() {
     const { theme } = useTheme();
+    const router = useRouter();
     const [lessonType, setLessonType] = useState('video');
     const [lessonTitle, setLessonTitle] = useState('');
     const [courseId, setCourseId] = useState('');
@@ -30,16 +38,31 @@ export default function CreateLessonPage() {
     const [status, setStatus] = useState('draft');
     const [submitted, setSubmitted] = useState(false);
     const [errors, setErrors] = useState<FormErrors>({});
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
-    // Sample course data for dropdown
-    const courses = [
-        { id: '1', title: 'Web Development Fundamentals' },
-        { id: '2', title: 'Advanced JavaScript' },
-        { id: '3', title: 'Backend Development' },
-        { id: '4', title: 'UI/UX Design Principles' }
-    ];
+    // Courses state
+    const [courses, setCourses] = useState<Course[]>([]);
 
-    const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+    // Fetch courses on component mount
+    useEffect(() => {
+        const fetchCourses = async () => {
+            try {
+                const response = await fetch('http://localhost:8000/courses');
+                if (!response.ok) {
+                    throw new Error('Failed to fetch courses');
+                }
+                const data = await response.json();
+                setCourses(data);
+            } catch (error) {
+                console.error('Error fetching courses:', error);
+                // Optionally show error to user
+            }
+        };
+
+        fetchCourses();
+    }, []);
+
+    const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault();
 
         // Basic validation
@@ -62,23 +85,41 @@ export default function CreateLessonPage() {
         }
 
         // Form is valid, proceed with submission
-        setSubmitted(true);
+        setIsSubmitting(true);
         setErrors({});
 
-        // Here you would typically make an API call to save the lesson
-        console.log({
-            title: lessonTitle,
-            courseId,
-            description,
-            duration,
-            type: lessonType,
-            status,
-            documentFile: documentFile?.name,
-            videoUrl
-        });
+        try {
+            const lessonData = {
+                title: lessonTitle,
+                courseId,
+                description,
+                contentType: lessonType as 'video' | 'document',
+                status: status as 'draft' | 'published',
+                duration: duration || undefined,
+                contentUrl: lessonType === 'video' ? videoUrl : undefined,
+            };
 
-        // Reset form or redirect after successful submission
-        // window.location.href = "/dashboard/lecturer/lessons";
+            const result = await lessonService.createLesson(
+                lessonData,
+                lessonType === 'document' ? documentFile || undefined : undefined
+            );
+
+            console.log('Lesson created successfully:', result);
+
+            setSubmitted(true);
+
+            // Redirect to lessons page after successful submission
+            setTimeout(() => {
+                router.push('/dashboard/lecturer/lessons');
+            }, 2000);
+
+        } catch (error) {
+            console.error('Error creating lesson:', error);
+            // Set error message to display to user
+            setErrors({ title: error instanceof Error ? error.message : 'Failed to create lesson' });
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
     const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -166,7 +207,7 @@ export default function CreateLessonPage() {
                             >
                                 <option value="">Select a course</option>
                                 {courses.map((course) => (
-                                    <option  className='bg-gray-500 text-black' key={course.id} value={course.id}>
+                                    <option className='bg-gray-500 text-black' key={course.id} value={course.id}>
                                         {course.title}
                                     </option>
                                 ))}
@@ -492,13 +533,23 @@ export default function CreateLessonPage() {
 
                         <Button
                             type="submit"
+                            disabled={isSubmitting}
                             className={
                                 theme === 'dark'
-                                    ? 'bg-blue-600 hover:bg-blue-700 text-white'
-                                    : 'bg-teal-600 hover:bg-teal-700 text-white'
+                                    ? 'bg-blue-600 hover:bg-blue-700 text-white disabled:opacity-50'
+                                    : 'bg-teal-600 hover:bg-teal-700 text-white disabled:opacity-50'
                             }
                         >
-                            <Save size={16} className="mr-2" /> Save Lesson
+                            {isSubmitting ? (
+                                <>
+                                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
+                                    Creating...
+                                </>
+                            ) : (
+                                <>
+                                    <Save size={16} className="mr-2" /> Save Lesson
+                                </>
+                            )}
                         </Button>
                     </div>
                 </div>
