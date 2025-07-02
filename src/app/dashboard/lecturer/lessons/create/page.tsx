@@ -1,10 +1,7 @@
 "use client";
 
 import { useState, FormEvent, ChangeEvent, useEffect } from 'react';
-<<<<<<< HEAD
-=======
 import { useRouter } from 'next/navigation';
->>>>>>> 98414113c0390847a7de4771865d8ca8ddb08dac
 import {
     BookOpen, Save, ArrowLeft, FileText, Video, Upload, Eye,
     X, HelpCircle, AlertTriangle, Loader2
@@ -12,12 +9,7 @@ import {
 import Link from 'next/link';
 import { useTheme } from '@/hooks/useTheme';
 import { Button } from '@/Components/ui/button';
-<<<<<<< HEAD
-import { useRouter } from 'next/navigation';
-import { lessonService } from '@/services/lessonService';
-=======
 import { lessonService, CreateLessonParams } from '@/services/lessonService';
->>>>>>> 98414113c0390847a7de4771865d8ca8ddb08dac
 
 // Define the structure for form errors
 interface FormErrors {
@@ -54,21 +46,6 @@ export default function CreateLessonPage() {
     const [status, setStatus] = useState('draft');
     const [submitted, setSubmitted] = useState(false);
     const [errors, setErrors] = useState<FormErrors>({});
-<<<<<<< HEAD
-    const [isSubmitting, setIsSubmitting] = useState(false);
-
-    // Courses state
-    const [courses, setCourses] = useState<Course[]>([]);
-
-    // Fetch courses on component mount
-    useEffect(() => {
-        const fetchCourses = async () => {
-            try {
-                const response = await fetch('http://localhost:8000/courses');
-                if (!response.ok) {
-                    throw new Error('Failed to fetch courses');
-                }
-=======
     const [isLoading, setIsLoading] = useState(false);
     const [courses, setCourses] = useState<Course[]>([]);
 
@@ -85,15 +62,10 @@ export default function CreateLessonPage() {
                     throw new Error('Failed to fetch courses');
                 }
 
->>>>>>> 98414113c0390847a7de4771865d8ca8ddb08dac
                 const data = await response.json();
                 setCourses(data);
             } catch (error) {
                 console.error('Error fetching courses:', error);
-<<<<<<< HEAD
-                // Optionally show error to user
-=======
->>>>>>> 98414113c0390847a7de4771865d8ca8ddb08dac
             }
         };
 
@@ -128,32 +100,6 @@ export default function CreateLessonPage() {
         }
 
         // Form is valid, proceed with submission
-<<<<<<< HEAD
-        setIsSubmitting(true);
-        setErrors({});
-
-        try {
-            const lessonData = {
-                title: lessonTitle,
-                courseId,
-                description,
-                contentType: lessonType as 'video' | 'document',
-                status: status as 'draft' | 'published',
-                duration: duration || undefined,
-                contentUrl: lessonType === 'video' ? videoUrl : undefined,
-            };
-
-            const result = await lessonService.createLesson(
-                lessonData,
-                lessonType === 'document' ? documentFile || undefined : undefined
-            );
-
-            console.log('Lesson created successfully:', result);
-
-            setSubmitted(true);
-
-            // Redirect to lessons page after successful submission
-=======
         setIsLoading(true);
         setErrors({});
 
@@ -181,25 +127,17 @@ export default function CreateLessonPage() {
             setSubmitted(true);
 
             // Redirect after showing success message for a moment
->>>>>>> 98414113c0390847a7de4771865d8ca8ddb08dac
             setTimeout(() => {
                 router.push('/dashboard/lecturer/lessons');
             }, 2000);
 
         } catch (error) {
             console.error('Error creating lesson:', error);
-<<<<<<< HEAD
-            // Set error message to display to user
-            setErrors({ title: error instanceof Error ? error.message : 'Failed to create lesson' });
-        } finally {
-            setIsSubmitting(false);
-=======
             setErrors({
                 serverError: error instanceof Error ? error.message : 'An unexpected error occurred'
             });
         } finally {
             setIsLoading(false);
->>>>>>> 98414113c0390847a7de4771865d8ca8ddb08dac
         }
     };
 
@@ -295,11 +233,7 @@ export default function CreateLessonPage() {
                             >
                                 <option value="">Select a course</option>
                                 {courses.map((course) => (
-<<<<<<< HEAD
-                                    <option className='bg-gray-500 text-black' key={course.id} value={course.id}>
-=======
                                     <option key={course.id} value={course.id}>
->>>>>>> 98414113c0390847a7de4771865d8ca8ddb08dac
                                         {course.title}
                                     </option>
                                 ))}
@@ -345,7 +279,7 @@ export default function CreateLessonPage() {
                                 value={duration}
                                 onChange={(e) => setDuration(e.target.value)}
                                 min="1"
-                                className={`w-full px-3 py-2 rounded-md border ${errors.duration ? 'border-red-500' : 
+                                className={`w-full px-3 py-2 rounded-md border ${errors.duration ? 'border-red-500' :
                                     theme === 'dark' ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'
                                     } focus:outline-none focus:ring-2 ${theme === 'dark' ? 'focus:ring-blue-500' : 'focus:ring-teal-500'
                                     }`}
@@ -630,27 +564,16 @@ export default function CreateLessonPage() {
 
                         <Button
                             type="submit"
-<<<<<<< HEAD
-                            disabled={isSubmitting}
-=======
                             disabled={isLoading}
->>>>>>> 98414113c0390847a7de4771865d8ca8ddb08dac
                             className={
                                 theme === 'dark'
                                     ? 'bg-blue-600 hover:bg-blue-700 text-white disabled:opacity-50'
                                     : 'bg-teal-600 hover:bg-teal-700 text-white disabled:opacity-50'
                             }
                         >
-<<<<<<< HEAD
-                            {isSubmitting ? (
-                                <>
-                                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
-                                    Creating...
-=======
                             {isLoading ? (
                                 <>
                                     <Loader2 size={16} className="mr-2 animate-spin" /> Saving...
->>>>>>> 98414113c0390847a7de4771865d8ca8ddb08dac
                                 </>
                             ) : (
                                 <>

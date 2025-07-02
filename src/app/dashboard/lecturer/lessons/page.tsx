@@ -14,15 +14,8 @@ import { lessonService, Lesson } from '@/services/lessonService';
 export default function LessonsPage() {
     const { theme } = useTheme();
     const [searchTerm, setSearchTerm] = useState('');
-<<<<<<< HEAD
     const [lessons, setLessons] = useState<Lesson[]>([]);
     const [allLessons, setAllLessons] = useState<Lesson[]>([]);
-=======
-    const [allLessons, setAllLessons] = useState<Lesson[]>([]);
-    const [lessons, setLessons] = useState<Lesson[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
->>>>>>> 98414113c0390847a7de4771865d8ca8ddb08dac
     const [filterStatus, setFilterStatus] = useState('all');
     const [filterType, setFilterType] = useState('all');
     const [loading, setLoading] = useState(true);
@@ -33,7 +26,7 @@ export default function LessonsPage() {
         const fetchLessons = async () => {
             try {
                 setLoading(true);
-                const data = await lessonService.getAllLessons();
+                const data = await lessonService.getAll();
                 setAllLessons(data);
                 setLessons(data);
                 setError(null);
@@ -49,22 +42,7 @@ export default function LessonsPage() {
     }, []);
 
     // Delete lesson handler
-    const handleDeleteLesson = async (id: string) => {
-        if (!window.confirm('Are you sure you want to delete this lesson?')) {
-            return;
-        }
-
-        try {
-            await lessonService.deleteLesson(id);
-            // Remove from local state
-            const updatedLessons = allLessons.filter(lesson => lesson.id !== id);
-            setAllLessons(updatedLessons);
-            setLessons(updatedLessons);
-        } catch (error) {
-            console.error('Error deleting lesson:', error);
-            setError('Failed to delete lesson. Please try again.');
-        }
-    };
+    // (removed duplicate declaration)
 
     // Fetch lessons from API
     useEffect(() => {
@@ -93,11 +71,7 @@ export default function LessonsPage() {
         if (searchTerm) {
             filteredLessons = filteredLessons.filter(lesson =>
                 lesson.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-<<<<<<< HEAD
-                (lesson.course?.title || '').toLowerCase().includes(searchTerm.toLowerCase())
-=======
                 (lesson.courseId && lesson.courseId.toLowerCase().includes(searchTerm.toLowerCase()))
->>>>>>> 98414113c0390847a7de4771865d8ca8ddb08dac
             );
         }
 
@@ -111,20 +85,11 @@ export default function LessonsPage() {
         // Apply type filter
         if (filterType !== 'all') {
             filteredLessons = filteredLessons.filter(lesson =>
-<<<<<<< HEAD
-                lesson.contentType === filterType
-=======
                 (lesson.contentType || lesson.type) === filterType
->>>>>>> 98414113c0390847a7de4771865d8ca8ddb08dac
             );
         }
 
         setLessons(filteredLessons);
-<<<<<<< HEAD
-    }, [searchTerm, filterStatus, filterType, allLessons]);
-
-    const getLessonTypeIcon = (type: string) => {
-=======
     }, [allLessons, searchTerm, filterStatus, filterType]);
 
     // Delete lesson handler
@@ -164,7 +129,6 @@ export default function LessonsPage() {
 
     const getLessonTypeIcon = (lesson: Lesson) => {
         const type = lesson.contentType || lesson.type || 'document';
->>>>>>> 98414113c0390847a7de4771865d8ca8ddb08dac
         switch (type) {
             case 'video':
                 return <Video size={18} className={theme === 'dark' ? 'text-blue-400' : 'text-teal-600'} />;
@@ -353,20 +317,6 @@ export default function LessonsPage() {
                                             </div>
                                         </td>
                                         <td className={`px-6 py-4 whitespace-nowrap ${theme === 'dark' ? 'text-gray-300' : 'text-gray-500'}`}>
-<<<<<<< HEAD
-                                            {lesson.course?.title || 'N/A'}
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap">
-                                            <div className="flex items-center">
-                                                {getLessonTypeIcon(lesson.contentType)}
-                                                <span className={`ml-2 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-500'}`}>
-                                                    {lesson.contentType.charAt(0).toUpperCase() + lesson.contentType.slice(1)}
-                                                </span>
-                                            </div>
-                                        </td>
-                                        <td className={`px-6 py-4 whitespace-nowrap ${theme === 'dark' ? 'text-gray-300' : 'text-gray-500'}`}>
-                                            {lesson.duration || 'N/A'}
-=======
                                             {lesson.courseId}
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap">
@@ -384,17 +334,12 @@ export default function LessonsPage() {
                                         </td>
                                         <td className={`px-6 py-4 whitespace-nowrap ${theme === 'dark' ? 'text-gray-300' : 'text-gray-500'}`}>
                                             {formatDuration(lesson.duration)}
->>>>>>> 98414113c0390847a7de4771865d8ca8ddb08dac
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap">
                                             {getStatusBadge(lesson.status)}
                                         </td>
                                         <td className={`px-6 py-4 whitespace-nowrap ${theme === 'dark' ? 'text-gray-300' : 'text-gray-500'}`}>
-<<<<<<< HEAD
-                                            {new Date(lesson.createdAt).toLocaleDateString()}
-=======
                                             {formatDate(lesson.createdAt)}
->>>>>>> 98414113c0390847a7de4771865d8ca8ddb08dac
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-right">
                                             <div className="flex justify-end space-x-2">
@@ -421,27 +366,6 @@ export default function LessonsPage() {
                                                     </button>
                                                 </Link>
                                                 <button
-<<<<<<< HEAD
-                                                    className={`p-1 rounded-full ${theme === 'dark'
-                                                        ? 'hover:bg-gray-600 text-gray-300'
-                                                        : 'hover:bg-gray-100 text-gray-600'
-                                                        }`}
-                                                    title="Preview"
-                                                >
-                                                    <ExternalLink size={18} />
-                                                </button>
-                                                <button
-                                                    className={`p-1 rounded-full ${theme === 'dark'
-                                                        ? 'hover:bg-gray-600 text-blue-400'
-                                                        : 'hover:bg-gray-100 text-teal-600'
-                                                        }`}
-                                                    title="Edit"
-                                                >
-                                                    <Edit size={18} />
-                                                </button>
-                                                <button
-=======
->>>>>>> 98414113c0390847a7de4771865d8ca8ddb08dac
                                                     onClick={() => handleDeleteLesson(lesson.id)}
                                                     className={`p-1 rounded-full ${theme === 'dark'
                                                         ? 'hover:bg-gray-600 text-red-400'
