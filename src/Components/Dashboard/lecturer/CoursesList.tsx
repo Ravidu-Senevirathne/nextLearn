@@ -1,11 +1,12 @@
 "use client";
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { BookOpen, Star } from 'lucide-react';
 import { useTheme } from '@/hooks/useTheme';
 
 interface Course {
+    id: number;
     title: string;
     students: number;
     completion: number;
@@ -16,8 +17,43 @@ interface CoursesListProps {
     courses: Course[];
 }
 
-const CoursesList: React.FC<CoursesListProps> = ({ courses }) => {
+const CoursesList: React.FC<CoursesListProps> = ({ courses: initialCourses }) => {
+    const [courses, setCourses] = useState(initialCourses || []);
+    const [loading, setLoading] = useState(!initialCourses);
+    const [error, setError] = useState('');
     const { theme } = useTheme();
+
+    useEffect(() => {
+        // If courses were passed as props, don't fetch
+        if (initialCourses) return;
+
+        const fetchCourses = async () => {
+            try {
+                setLoading(true);
+                const response = await fetch('http://localhost:8000/lecturer/courses', {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    credentials: 'include',
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Error ${response.status}: ${response.statusText}`);
+                }
+
+                const data = await response.json();
+                setCourses(data);
+            } catch (err: any) {
+                console.error("Error fetching courses:", err);
+                setError(err.message || 'Failed to load courses');
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchCourses();
+    }, [initialCourses]);
 
     // Helper functions for theme-specific styling
     const getCardStyle = () => {
@@ -88,60 +124,70 @@ const CoursesList: React.FC<CoursesListProps> = ({ courses }) => {
 
     return (
         <div className={`${getCardStyle()} rounded-lg overflow-hidden`}>
-            <div className={`p-4 ${getHeaderStyle()}`}>
-                <h3 className={`font-semibold flex items-center ${getTitleTextStyle()}`}>
-                    <BookOpen size={18} className={`mr-2 ${theme === 'dark' ? 'text-blue-400' : 'text-blue-600'}`} />
-                    Popular Courses
-                </h3>
-            </div>
-            <div className={`${getDividerStyle()} ${getContentStyle()}`}>
-                {courses.map((course, index) => (
-                    <div key={index} className={`p-4 ${getHoverStyle()} transition-colors`}>
-                        <div className="flex justify-between items-center">
-                            <div className="flex-1">
-                                <h4 className={`font-medium ${getTitleTextStyle()}`}>{course.title}</h4>
-                                <div className="flex items-center mt-1">
-                                    <span className={`text-sm ${getTextStyle()}`}>
-                                        {course.students} students
-                                    </span>
-                                    <span className="mx-2 text-gray-500">•</span>
-                                    <div className="flex items-center">
-                                        <Star size={14} className="text-yellow-400 mr-1" />
-                                        <span className={`text-sm ${getTextStyle()}`}>
-                                            {course.rating}
-                                        </span>
+            {loading ? (
+                <div className="flex justify-center items-center p-8">
+                    <div className="w-8 h-8 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+                </div>
+            ) : error ? (
+                <div className="p-4 text-red-500">{error}</div>
+            ) : (
+                <>
+                    <div className={`p-4 ${getHeaderStyle()}`}>
+                        <h3 className={`font-semibold flex items-center ${getTitleTextStyle()}`}>
+                            <BookOpen size={18} className={`mr-2 ${theme === 'dark' ? 'text-blue-400' : 'text-blue-600'}`} />
+                            Popular Courses
+                        </h3>
+                    </div>
+                    <div className={`${getDividerStyle()} ${getContentStyle()}`}>
+                        {courses.map((course, index) => (
+                            <div key={index} className={`p-4 ${getHoverStyle()} transition-colors`}>
+                                <div className="flex justify-between items-center">
+                                    <div className="flex-1">
+                                        <h4 className={`font-medium ${getTitleTextStyle()}`}>{course.title}</h4>
+                                        <div className="flex items-center mt-1">
+                                            <span className={`text-sm ${getTextStyle()}`}>
+                                                {course.students} students
+                                            </span>
+                                            <span className="mx-2 text-gray-500">•</span>
+                                            <div className="flex items-center">
+                                                <Star size={14} className="text-yellow-400 mr-1" />
+                                                <span className={`text-sm ${getTextStyle()}`}>
+                                                    {course.rating}
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <div className="mt-3">
+                                            <div className="flex justify-between text-xs mb-1">
+                                                <span className={getTextStyle()}>Completion</span>
+                                                <span className={getTextStyle()}>{course.completion}%</span>
+                                            </div>
+                                            <div className={`w-full ${getProgressBgStyle()} rounded-full h-2`}>
+                                                <div
+                                                    className={`${getProgressFillStyle()} h-2 rounded-full transition-all duration-500`}
+                                                    style={{ width: `${course.completion}%` }}
+                                                ></div>
+                                            </div>
+                                        </div>
                                     </div>
-                                </div>
-                                <div className="mt-3">
-                                    <div className="flex justify-between text-xs mb-1">
-                                        <span className={getTextStyle()}>Completion</span>
-                                        <span className={getTextStyle()}>{course.completion}%</span>
-                                    </div>
-                                    <div className={`w-full ${getProgressBgStyle()} rounded-full h-2`}>
-                                        <div
-                                            className={`${getProgressFillStyle()} h-2 rounded-full transition-all duration-500`}
-                                            style={{ width: `${course.completion}%` }}
-                                        ></div>
-                                    </div>
+                                    <Link href={`/dashboard/lecturer/courses/${course.id}`}>
+                                        <button className={`ml-4 px-3 py-2 rounded-md text-sm ${getButtonStyle()}`}>
+                                            View
+                                        </button>
+                                    </Link>
                                 </div>
                             </div>
-                            <Link href={`/dashboard/lecturer/courses/${index + 1}`}>
-                                <button className={`ml-4 px-3 py-2 rounded-md text-sm ${getButtonStyle()}`}>
-                                    View
-                                </button>
-                            </Link>
-                        </div>
+                        ))}
                     </div>
-                ))}
-            </div>
-            <div className={`p-3 ${getHeaderStyle()}`}>
-                <Link
-                    href="/dashboard/lecturer/courses"
-                    className={`text-center block w-full text-sm ${getLinkStyle()}`}
-                >
-                    View All Courses
-                </Link>
-            </div>
+                    <div className={`p-3 ${getHeaderStyle()}`}>
+                        <Link
+                            href="/dashboard/lecturer/courses"
+                            className={`text-center block w-full text-sm ${getLinkStyle()}`}
+                        >
+                            View All Courses
+                        </Link>
+                    </div>
+                </>
+            )}
         </div>
     );
 };

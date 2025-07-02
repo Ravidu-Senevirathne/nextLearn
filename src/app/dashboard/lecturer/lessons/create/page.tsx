@@ -1,15 +1,23 @@
 "use client";
 
 import { useState, FormEvent, ChangeEvent, useEffect } from 'react';
+<<<<<<< HEAD
+=======
+import { useRouter } from 'next/navigation';
+>>>>>>> 98414113c0390847a7de4771865d8ca8ddb08dac
 import {
     BookOpen, Save, ArrowLeft, FileText, Video, Upload, Eye,
-    X, HelpCircle, AlertTriangle
+    X, HelpCircle, AlertTriangle, Loader2
 } from 'lucide-react';
 import Link from 'next/link';
 import { useTheme } from '@/hooks/useTheme';
 import { Button } from '@/Components/ui/button';
+<<<<<<< HEAD
 import { useRouter } from 'next/navigation';
 import { lessonService } from '@/services/lessonService';
+=======
+import { lessonService, CreateLessonParams } from '@/services/lessonService';
+>>>>>>> 98414113c0390847a7de4771865d8ca8ddb08dac
 
 // Define the structure for form errors
 interface FormErrors {
@@ -18,6 +26,14 @@ interface FormErrors {
     description?: string;
     videoUrl?: string;
     documentFile?: string;
+    duration?: string;
+    serverError?: string;
+}
+
+// Define course interface
+interface Course {
+    id: string;
+    title: string;
 }
 
 interface Course {
@@ -38,6 +54,7 @@ export default function CreateLessonPage() {
     const [status, setStatus] = useState('draft');
     const [submitted, setSubmitted] = useState(false);
     const [errors, setErrors] = useState<FormErrors>({});
+<<<<<<< HEAD
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     // Courses state
@@ -51,11 +68,32 @@ export default function CreateLessonPage() {
                 if (!response.ok) {
                     throw new Error('Failed to fetch courses');
                 }
+=======
+    const [isLoading, setIsLoading] = useState(false);
+    const [courses, setCourses] = useState<Course[]>([]);
+
+    // Fetch courses on component mount
+    useEffect(() => {
+        const fetchCourses = async () => {
+            try {
+                // Replace with your actual course API endpoint
+                const response = await fetch('http://localhost:8000/courses', {
+                    credentials: 'include',
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to fetch courses');
+                }
+
+>>>>>>> 98414113c0390847a7de4771865d8ca8ddb08dac
                 const data = await response.json();
                 setCourses(data);
             } catch (error) {
                 console.error('Error fetching courses:', error);
+<<<<<<< HEAD
                 // Optionally show error to user
+=======
+>>>>>>> 98414113c0390847a7de4771865d8ca8ddb08dac
             }
         };
 
@@ -79,12 +117,18 @@ export default function CreateLessonPage() {
             newErrors.documentFile = 'Document file is required';
         }
 
+        // Validate duration if provided
+        if (duration && (isNaN(parseInt(duration, 10)) || parseInt(duration, 10) < 1)) {
+            newErrors.duration = 'Duration must be a valid positive number';
+        }
+
         if (Object.keys(newErrors).length > 0) {
             setErrors(newErrors);
             return;
         }
 
         // Form is valid, proceed with submission
+<<<<<<< HEAD
         setIsSubmitting(true);
         setErrors({});
 
@@ -109,16 +153,53 @@ export default function CreateLessonPage() {
             setSubmitted(true);
 
             // Redirect to lessons page after successful submission
+=======
+        setIsLoading(true);
+        setErrors({});
+
+        try {
+            // Prepare data for API call
+            const lessonData: CreateLessonParams = {
+                title: lessonTitle,
+                courseId,
+                description,
+                // Convert duration to integer if provided
+                duration: duration ? parseInt(duration, 10) : undefined,
+                // Explicitly set contentType to one of the allowed values
+                contentType: lessonType as 'video' | 'document',
+                status: status as 'draft' | 'published',
+                videoUrl: lessonType === 'video' ? videoUrl : undefined,
+                documentFile: lessonType === 'document' ? documentFile || undefined : undefined
+            };
+
+            console.log('Submitting lesson data:', lessonData);
+
+            // Send to API
+            await lessonService.createLesson(lessonData);
+
+            // Show success message and redirect after a delay
+            setSubmitted(true);
+
+            // Redirect after showing success message for a moment
+>>>>>>> 98414113c0390847a7de4771865d8ca8ddb08dac
             setTimeout(() => {
                 router.push('/dashboard/lecturer/lessons');
             }, 2000);
 
         } catch (error) {
             console.error('Error creating lesson:', error);
+<<<<<<< HEAD
             // Set error message to display to user
             setErrors({ title: error instanceof Error ? error.message : 'Failed to create lesson' });
         } finally {
             setIsSubmitting(false);
+=======
+            setErrors({
+                serverError: error instanceof Error ? error.message : 'An unexpected error occurred'
+            });
+        } finally {
+            setIsLoading(false);
+>>>>>>> 98414113c0390847a7de4771865d8ca8ddb08dac
         }
     };
 
@@ -150,6 +231,13 @@ export default function CreateLessonPage() {
                     Add a new lesson to your course
                 </p>
             </div>
+
+            {errors.serverError && (
+                <div className={`mb-6 p-4 rounded-lg bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-100`}>
+                    <p className="font-medium">Error</p>
+                    <p className="mt-1">{errors.serverError}</p>
+                </div>
+            )}
 
             {submitted && (
                 <div className={`mb-6 p-4 rounded-lg ${theme === 'dark' ? 'bg-green-900 text-green-100' : 'bg-green-100 text-green-800'
@@ -201,13 +289,17 @@ export default function CreateLessonPage() {
                                 value={courseId}
                                 onChange={(e) => setCourseId(e.target.value)}
                                 className={`w-full px-3 py-2 rounded-md border ${errors.courseId ? 'border-red-500' :
-                                    theme === 'dark' ? 'bg-gray-700 border-gray-600 text-white' : 'bg-gray-500 border-gray-300 text-gray-900'
+                                    theme === 'dark' ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'
                                     } focus:outline-none focus:ring-2 ${theme === 'dark' ? 'focus:ring-blue-500' : 'focus:ring-teal-500'
-                                    } [&>option]:text-black [&>option]:bg-white ${theme === 'dark' && '[&>option]:bg-gray-700 [&>option]:text-black'}`}
+                                    }`}
                             >
                                 <option value="">Select a course</option>
                                 {courses.map((course) => (
+<<<<<<< HEAD
                                     <option className='bg-gray-500 text-black' key={course.id} value={course.id}>
+=======
+                                    <option key={course.id} value={course.id}>
+>>>>>>> 98414113c0390847a7de4771865d8ca8ddb08dac
                                         {course.title}
                                     </option>
                                 ))}
@@ -248,17 +340,22 @@ export default function CreateLessonPage() {
                                 Duration (minutes)
                             </label>
                             <input
-                                type="text"
+                                type="number"
                                 id="duration"
                                 value={duration}
                                 onChange={(e) => setDuration(e.target.value)}
-                                className={`w-full px-3 py-2 rounded-md border ${theme === 'dark' ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'
+                                min="1"
+                                className={`w-full px-3 py-2 rounded-md border ${errors.duration ? 'border-red-500' : 
+                                    theme === 'dark' ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'
                                     } focus:outline-none focus:ring-2 ${theme === 'dark' ? 'focus:ring-blue-500' : 'focus:ring-teal-500'
                                     }`}
                                 placeholder="e.g., 45"
                             />
+                            {errors.duration && (
+                                <p className="mt-1 text-sm text-red-500">{errors.duration}</p>
+                            )}
                             <p className={`mt-1 text-xs ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
-                                Optional: Estimated time to complete this lesson
+                                Optional: Estimated time to complete this lesson (in minutes)
                             </p>
                         </div>
                     </div>
@@ -533,17 +630,27 @@ export default function CreateLessonPage() {
 
                         <Button
                             type="submit"
+<<<<<<< HEAD
                             disabled={isSubmitting}
+=======
+                            disabled={isLoading}
+>>>>>>> 98414113c0390847a7de4771865d8ca8ddb08dac
                             className={
                                 theme === 'dark'
                                     ? 'bg-blue-600 hover:bg-blue-700 text-white disabled:opacity-50'
                                     : 'bg-teal-600 hover:bg-teal-700 text-white disabled:opacity-50'
                             }
                         >
+<<<<<<< HEAD
                             {isSubmitting ? (
                                 <>
                                     <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
                                     Creating...
+=======
+                            {isLoading ? (
+                                <>
+                                    <Loader2 size={16} className="mr-2 animate-spin" /> Saving...
+>>>>>>> 98414113c0390847a7de4771865d8ca8ddb08dac
                                 </>
                             ) : (
                                 <>

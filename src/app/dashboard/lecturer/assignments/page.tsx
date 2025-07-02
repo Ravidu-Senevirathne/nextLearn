@@ -3,13 +3,29 @@
 import React, { useState, useEffect } from 'react';
 import { Plus, Search, Filter, Calendar, Clock, ChevronDown, Edit, Trash2, ExternalLink, AlertCircle, RefreshCw } from 'lucide-react';
 import Link from 'next/link';
+<<<<<<< HEAD
 import { useTheme } from '@/hooks/useTheme';
 import { assignmentService, Assignment } from '@/services/assignmentService';
+=======
+import { useTheme } from 'next-themes';
+import { assignmentService } from '@/services/assignmentService';
+import { Assignment } from '@/types/assignment';
+import { Course } from '@/types/course';
+import { format, parse, isAfter } from 'date-fns';
+
+// Extend Assignment type for local UI state
+interface AssignmentWithStats extends Assignment {
+    status: 'Active' | 'Expired' | 'Draft';
+    submissions: number;
+    totalStudents: number;
+}
+>>>>>>> 98414113c0390847a7de4771865d8ca8ddb08dac
 
 export default function AssignmentsPage() {
     const { theme } = useTheme();
     const [filter, setFilter] = useState('all');
     const [searchQuery, setSearchQuery] = useState('');
+<<<<<<< HEAD
     const [assignments, setAssignments] = useState<Assignment[]>([]);
     const [allAssignments, setAllAssignments] = useState<Assignment[]>([]);
     const [loading, setLoading] = useState(true);
@@ -37,11 +53,20 @@ export default function AssignmentsPage() {
             setRefreshing(false);
         }
     };
+=======
+    const { theme, resolvedTheme } = useTheme();
+    const [mounted, setMounted] = useState(false);
+    const [assignments, setAssignments] = useState<AssignmentWithStats[]>([]);
+    const [courses, setCourses] = useState<Course[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+>>>>>>> 98414113c0390847a7de4771865d8ca8ddb08dac
 
     useEffect(() => {
         fetchAssignments();
     }, []);
 
+<<<<<<< HEAD
     // Delete assignment handler
     const handleDeleteAssignment = async (id: string) => {
         if (!window.confirm('Are you sure you want to delete this assignment?')) {
@@ -98,7 +123,65 @@ export default function AssignmentsPage() {
             <span className={`inline-block px-2 py-1 text-xs rounded-full ${statusColors[status as keyof typeof statusColors] || statusColors.draft}`}>
                 {status.charAt(0).toUpperCase() + status.slice(1)}
             </span>
+=======
+    // Fetch assignments and courses
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                setLoading(true);
+                // Fetch assignments
+                const data = await assignmentService.getAll();
+                // Fetch courses
+                const coursesRes = await fetch('http://localhost:8000/courses', { credentials: 'include' });
+                const coursesData = await coursesRes.json();
+                setCourses(coursesData);
+                // Process the data to include calculated fields
+                const processedAssignments: AssignmentWithStats[] = data.map((assignment: Assignment) => {
+                    const now = new Date();
+                    const dueDate = new Date(assignment.dueDate);
+                    return {
+                        ...assignment,
+                        status: isAfter(dueDate, now) ? 'Active' : 'Expired',
+                        submissions: Math.floor(Math.random() * 30),
+                        totalStudents: 30
+                    };
+                });
+                setAssignments(processedAssignments);
+                setError(null);
+            } catch (err: any) {
+                console.error("Error fetching assignments or courses:", err);
+                setError(err.message || "Failed to load assignments");
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchData();
+    }, []);
+
+    const isDark = mounted && (theme === 'dark' || resolvedTheme === 'dark');
+
+    // Filter assignments based on status and search query
+    const filteredAssignments = assignments
+        .filter(assignment => {
+            if (filter === 'all') return true;
+            return assignment.status?.toLowerCase() === filter.toLowerCase();
+        })
+        .filter(assignment =>
+            assignment.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            assignment.courseId.toString().toLowerCase().includes(searchQuery.toLowerCase())
+>>>>>>> 98414113c0390847a7de4771865d8ca8ddb08dac
         );
+    };
+
+    // Format date for display
+    const formatDate = (dateString: string) => {
+        try {
+            const date = new Date(dateString);
+            return format(date, 'yyyy-MM-dd');
+        } catch (error) {
+            return dateString;
+        }
     };
 
     return (
@@ -182,6 +265,7 @@ export default function AssignmentsPage() {
                 </div>
             </div>
 
+<<<<<<< HEAD
             {/* Assignments Table */}
             <div className="overflow-x-auto">
                 <div className={`rounded-lg shadow ${theme === 'dark' ? 'bg-gray-800' : 'bg-white'}`}>
@@ -330,6 +414,92 @@ export default function AssignmentsPage() {
                             <div className={`text-2xl font-bold ${theme === 'dark' ? 'text-amber-400' : 'text-amber-700'}`}>
                                 {allAssignments.filter(a => a.status === 'draft').length}
                             </div>
+=======
+            {/* Assignment List */}
+            {loading ? (
+                <div className="text-center p-8">
+                    <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-teal-500 mx-auto"></div>
+                    <p className="mt-4 text-gray-600 dark:text-gray-400">Loading assignments...</p>
+                </div>
+            ) : error ? (
+                <div className="p-4 bg-red-50 dark:bg-red-900/30 text-red-800 dark:text-red-300 rounded-lg text-center">
+                    {error}
+                </div>
+            ) : (
+                <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm overflow-hidden">
+                    <div className="grid grid-cols-12 bg-gray-50 dark:bg-gray-700 p-4 border-b border-gray-200 dark:border-gray-600 text-sm font-medium text-gray-600 dark:text-gray-300">
+                        <div className="col-span-5">Assignment</div>
+                        <div className="col-span-2">Course</div>
+                        <div className="col-span-2">Due Date</div>
+                        <div className="col-span-2">Submissions</div>
+                        <div className="col-span-1">Status</div>
+                    </div>
+
+                    {filteredAssignments.length > 0 ? (
+                        <div className="divide-y divide-gray-200 dark:divide-gray-700">
+                            {filteredAssignments.map((assignment) => (
+                                <div key={assignment.id} className="grid grid-cols-12 p-4 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors items-center">
+                                    <div className="col-span-5">
+                                        <Link href={`/dashboard/lecturer/assignments/${assignment.id}`} className="font-medium text-teal-700 dark:text-teal-400 hover:text-teal-800 dark:hover:text-teal-300">
+                                            {assignment.title}
+                                        </Link>
+                                    </div>
+                                    <div className="col-span-2 text-sm text-gray-600 dark:text-gray-300">
+                                        {courses.find(c => c.id === assignment.courseId)?.title || assignment.courseId}
+                                    </div>
+                                    <div className="col-span-2 text-sm flex items-center text-gray-600 dark:text-gray-300">
+                                        <Calendar size={14} className="mr-2 text-gray-500 dark:text-gray-400" />
+                                        {formatDate(assignment.dueDate)}
+                                    </div>
+                                    <div className="col-span-2 text-sm text-gray-600 dark:text-gray-300">
+                                        <div className="inline-flex items-center">
+                                            <span className="mr-2">{assignment.submissions}/{assignment.totalStudents}</span>
+                                            <div className="w-24 bg-gray-200 dark:bg-gray-600 rounded-full h-2.5">
+                                                <div
+                                                    className="bg-teal-500 h-2.5 rounded-full"
+                                                    style={{ width: `${(assignment.submissions / assignment.totalStudents) * 100}%` }}
+                                                ></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div className="col-span-1">
+                                        <span className={`px-2 py-1 text-xs rounded-full ${assignment.status === 'Active'
+                                            ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300'
+                                            : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300'
+                                            }`}>
+                                            {assignment.status}
+                                        </span>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    ) : (
+                        <div className="p-8 text-center text-gray-500 dark:text-gray-400">
+                            No assignments found matching your criteria.
+                        </div>
+                    )}
+                </div>
+            )}
+
+            <div className="mt-6 bg-white dark:bg-gray-800 rounded-lg shadow-sm p-4">
+                <h2 className="text-lg font-semibold text-slate-800 dark:text-slate-200 mb-4">Quick Stats</h2>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="border border-gray-200 dark:border-gray-700 rounded-lg p-4 bg-teal-50 dark:bg-teal-900/30">
+                        <div className="text-sm text-gray-500 dark:text-gray-400 mb-1">Total Assignments</div>
+                        <div className="text-2xl font-bold text-teal-700 dark:text-teal-400">{assignments.length}</div>
+                    </div>
+                    <div className="border border-gray-200 dark:border-gray-700 rounded-lg p-4 bg-cyan-50 dark:bg-cyan-900/30">
+                        <div className="text-sm text-gray-500 dark:text-gray-400 mb-1">Active Assignments</div>
+                        <div className="text-2xl font-bold text-cyan-700 dark:text-cyan-400">
+                            {assignments.filter(a => a.status === 'Active').length}
+                        </div>
+                    </div>
+                    <div className="border border-gray-200 dark:border-gray-700 rounded-lg p-4 bg-blue-50 dark:bg-blue-900/30">
+                        <div className="text-sm text-gray-500 dark:text-gray-400 mb-1">Average Submission Rate</div>
+                        <div className="text-2xl font-bold text-blue-700 dark:text-blue-400">
+                            {Math.round(assignments.reduce((acc, curr) =>
+                                acc + (curr.submissions / curr.totalStudents), 0) / assignments.length * 100)}%
+>>>>>>> 98414113c0390847a7de4771865d8ca8ddb08dac
                         </div>
                     </div>
                 </div>

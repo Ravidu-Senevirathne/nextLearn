@@ -1,6 +1,6 @@
 "use client";
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Clipboard } from 'lucide-react';
 import { useTheme } from '@/hooks/useTheme';
@@ -18,8 +18,43 @@ interface SubmissionsListProps {
     submissions: Submission[];
 }
 
-const SubmissionsList: React.FC<SubmissionsListProps> = ({ submissions }) => {
+const SubmissionsList: React.FC<SubmissionsListProps> = ({ submissions: initialSubmissions }) => {
+    const [submissions, setSubmissions] = useState<Submission[]>(initialSubmissions || []);
+    const [loading, setLoading] = useState(!initialSubmissions);
+    const [error, setError] = useState('');
     const { theme } = useTheme();
+
+    useEffect(() => {
+        // If submissions were passed as props, don't fetch
+        if (initialSubmissions) return;
+
+        const fetchSubmissions = async () => {
+            try {
+                setLoading(true);
+                const response = await fetch('http://localhost:8000/lecturer/submissions/recent', {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    credentials: 'include',
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Error ${response.status}: ${response.statusText}`);
+                }
+
+                const data = await response.json();
+                setSubmissions(data);
+            } catch (err: any) {
+                console.error("Error fetching submissions:", err);
+                setError(err.message || 'Failed to load submissions');
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchSubmissions();
+    }, [initialSubmissions]);
 
     // Helper functions to get appropriate styles based on theme
     const getCardStyle = () => {
@@ -72,34 +107,45 @@ const SubmissionsList: React.FC<SubmissionsListProps> = ({ submissions }) => {
 
     return (
         <div className={`${getCardStyle()} rounded-lg overflow-hidden`}>
-            <div className={`p-4 ${getHeaderStyle()}`}>
-                <h3 className={`font-semibold flex items-center ${getTitleTextStyle()}`}>
-                    <Clipboard size={18} className={`mr-2 ${theme === 'dark' ? 'text-purple-400' : 'text-teal-600'}`} />
-                    Recent Submissions
-                </h3>
-            </div>
-            <div className={getDividerStyle()}>
-                {submissions.map((submission, index) => (
-                    <div key={index} className={`p-4 ${getHoverStyle()} transition-colors`}>
-                        <div className="flex justify-between items-center">
-                            <div>
-                                <h4 className={`font-medium ${theme === 'dark' ? 'text-white' : 'text-slate-800'}`}>{submission.student}</h4>
-                                <p className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-slate-600'}`}>
-                                    {submission.course} - {submission.assignment}
-                                </p>
-                                <div className={`mt-1 text-xs ${theme === 'dark' ? 'text-gray-500' : 'text-slate-500'}`}>
-                                    {submission.time}
+            {loading ? (
+                <div className="flex justify-center items-center p-8">
+                    <div className="w-8 h-8 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+                </div>
+            ) : error ? (
+                <div className="p-4 text-red-500">{error}</div>
+            ) : (
+                <>
+                    <div className={`p-4 ${getHeaderStyle()}`}>
+                        <h3 className={`font-semibold flex items-center ${getTitleTextStyle()}`}>
+                            <Clipboard size={18} className={`mr-2 ${theme === 'dark' ? 'text-purple-400' : 'text-teal-600'}`} />
+                            Recent Submissions
+                        </h3>
+                    </div>
+                    <div className={getDividerStyle()}>
+                        {submissions.map((submission, index) => (
+                            <div key={index} className={`p-4 ${getHoverStyle()} transition-colors`}>
+                                <div className="flex justify-between items-center">
+                                    <div>
+                                        <h4 className={`font-medium ${theme === 'dark' ? 'text-white' : 'text-slate-800'}`}>{submission.student}</h4>
+                                        <p className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-slate-600'}`}>
+                                            {submission.course} - {submission.assignment}
+                                        </p>
+                                        <div className={`mt-1 text-xs ${theme === 'dark' ? 'text-gray-500' : 'text-slate-500'}`}>
+                                            {submission.time}
+                                        </div>
+                                    </div>
+                                    <div className="flex items-center">
+                                        <span className={`px-3 py-1 text-xs rounded-full ${getStatusStyle(submission.status)}`}>
+                                            {submission.status === 'pending' ? 'Needs Grading' : `Graded: ${submission.grade}`}
+                                        </span>
+                                    </div>
                                 </div>
                             </div>
-                            <div className="flex items-center">
-                                <span className={`px-3 py-1 text-xs rounded-full ${getStatusStyle(submission.status)}`}>
-                                    {submission.status === 'pending' ? 'Needs Grading' : `Graded: ${submission.grade}`}
-                                </span>
-                            </div>
-                        </div>
+                        ))}
                     </div>
-                ))}
-            </div>
+                </>
+            )}
+
             <div className={`p-3 ${getHeaderStyle()}`}>
                 <Link
                     href="/dashboard/lecturer/assignments"

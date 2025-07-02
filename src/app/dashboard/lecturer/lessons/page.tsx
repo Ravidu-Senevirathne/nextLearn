@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import {
     BookOpen, Search, Plus, Edit, Trash2, Filter,
     ArrowUpDown, FileText, Video, ExternalLink,
-    AlertCircle
+    AlertCircle, Loader2
 } from 'lucide-react';
 import Link from 'next/link';
 import { useTheme } from '@/hooks/useTheme';
@@ -14,8 +14,15 @@ import { lessonService, Lesson } from '@/services/lessonService';
 export default function LessonsPage() {
     const { theme } = useTheme();
     const [searchTerm, setSearchTerm] = useState('');
+<<<<<<< HEAD
     const [lessons, setLessons] = useState<Lesson[]>([]);
     const [allLessons, setAllLessons] = useState<Lesson[]>([]);
+=======
+    const [allLessons, setAllLessons] = useState<Lesson[]>([]);
+    const [lessons, setLessons] = useState<Lesson[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+>>>>>>> 98414113c0390847a7de4771865d8ca8ddb08dac
     const [filterStatus, setFilterStatus] = useState('all');
     const [filterType, setFilterType] = useState('all');
     const [loading, setLoading] = useState(true);
@@ -59,6 +66,25 @@ export default function LessonsPage() {
         }
     };
 
+    // Fetch lessons from API
+    useEffect(() => {
+        const fetchLessons = async () => {
+            try {
+                setLoading(true);
+                const data = await lessonService.getAll();
+                setAllLessons(data);
+                setError(null);
+            } catch (err) {
+                setError('Failed to load lessons');
+                console.error('Error fetching lessons:', err);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchLessons();
+    }, []);
+
     // Filter lessons based on search term and filters
     useEffect(() => {
         let filteredLessons = allLessons;
@@ -67,7 +93,11 @@ export default function LessonsPage() {
         if (searchTerm) {
             filteredLessons = filteredLessons.filter(lesson =>
                 lesson.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+<<<<<<< HEAD
                 (lesson.course?.title || '').toLowerCase().includes(searchTerm.toLowerCase())
+=======
+                (lesson.courseId && lesson.courseId.toLowerCase().includes(searchTerm.toLowerCase()))
+>>>>>>> 98414113c0390847a7de4771865d8ca8ddb08dac
             );
         }
 
@@ -81,14 +111,60 @@ export default function LessonsPage() {
         // Apply type filter
         if (filterType !== 'all') {
             filteredLessons = filteredLessons.filter(lesson =>
+<<<<<<< HEAD
                 lesson.contentType === filterType
+=======
+                (lesson.contentType || lesson.type) === filterType
+>>>>>>> 98414113c0390847a7de4771865d8ca8ddb08dac
             );
         }
 
         setLessons(filteredLessons);
+<<<<<<< HEAD
     }, [searchTerm, filterStatus, filterType, allLessons]);
 
     const getLessonTypeIcon = (type: string) => {
+=======
+    }, [allLessons, searchTerm, filterStatus, filterType]);
+
+    // Delete lesson handler
+    const handleDeleteLesson = async (id: string) => {
+        if (!confirm('Are you sure you want to delete this lesson?')) {
+            return;
+        }
+
+        try {
+            await lessonService.deleteLesson(id);
+            // Remove the deleted lesson from both states
+            setAllLessons(prev => prev.filter(lesson => lesson.id !== id));
+            setLessons(prev => prev.filter(lesson => lesson.id !== id));
+        } catch (err) {
+            console.error('Error deleting lesson:', err);
+            alert('Failed to delete lesson');
+        }
+    };
+
+    // Format date
+    const formatDate = (dateString: string) => {
+        try {
+            return new Date(dateString).toLocaleDateString();
+        } catch {
+            return dateString;
+        }
+    };
+
+    // Format duration
+    const formatDuration = (duration: string) => {
+        // If duration is just a number (minutes), format it
+        if (!isNaN(Number(duration))) {
+            return `${duration} min`;
+        }
+        return duration;
+    };
+
+    const getLessonTypeIcon = (lesson: Lesson) => {
+        const type = lesson.contentType || lesson.type || 'document';
+>>>>>>> 98414113c0390847a7de4771865d8ca8ddb08dac
         switch (type) {
             case 'video':
                 return <Video size={18} className={theme === 'dark' ? 'text-blue-400' : 'text-teal-600'} />;
@@ -99,7 +175,7 @@ export default function LessonsPage() {
         }
     };
 
-    const getStatusBadge = (status) => {
+    const getStatusBadge = (status: string) => {
         if (status === 'published') {
             return (
                 <span className={`inline-block px-2 py-1 text-xs rounded-full ${theme === 'dark' ? 'bg-green-900 text-green-100' : 'bg-green-100 text-green-800'
@@ -116,6 +192,36 @@ export default function LessonsPage() {
             );
         }
     };
+
+    // Show loading state
+    if (loading) {
+        return (
+            <div className="container mx-auto px-4 py-8">
+                <div className="flex justify-center items-center h-40">
+                    <Loader2 className="animate-spin h-8 w-8 text-primary" />
+                    <span className="ml-2">Loading lessons...</span>
+                </div>
+            </div>
+        );
+    }
+
+    // Show error state
+    if (error) {
+        return (
+            <div className="container mx-auto px-4 py-8">
+                <div className="p-6 bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200 rounded-md">
+                    <p className="font-medium">Error</p>
+                    <p>{error}</p>
+                    <button
+                        onClick={() => window.location.reload()}
+                        className="mt-2 px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700"
+                    >
+                        Retry
+                    </button>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="container mx-auto px-4 py-8">
@@ -218,7 +324,7 @@ export default function LessonsPage() {
                                         </div>
                                     </th>
                                     <th scope="col" className={`px-6 py-3 text-left text-xs font-medium ${theme === 'dark' ? 'text-gray-300' : 'text-gray-500'} uppercase tracking-wider`}>
-                                        Course
+                                        Course ID
                                     </th>
                                     <th scope="col" className={`px-6 py-3 text-left text-xs font-medium ${theme === 'dark' ? 'text-gray-300' : 'text-gray-500'} uppercase tracking-wider`}>
                                         Type
@@ -247,6 +353,7 @@ export default function LessonsPage() {
                                             </div>
                                         </td>
                                         <td className={`px-6 py-4 whitespace-nowrap ${theme === 'dark' ? 'text-gray-300' : 'text-gray-500'}`}>
+<<<<<<< HEAD
                                             {lesson.course?.title || 'N/A'}
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap">
@@ -259,16 +366,62 @@ export default function LessonsPage() {
                                         </td>
                                         <td className={`px-6 py-4 whitespace-nowrap ${theme === 'dark' ? 'text-gray-300' : 'text-gray-500'}`}>
                                             {lesson.duration || 'N/A'}
+=======
+                                            {lesson.courseId}
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap">
+                                            <div className="flex items-center">
+                                                {getLessonTypeIcon(lesson)}
+                                                {(() => {
+                                                    const typeLabel = String(lesson.contentType || lesson.type || 'document');
+                                                    return (
+                                                        <span className={`ml-2 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-500'}`}>
+                                                            {typeLabel.charAt(0).toUpperCase() + typeLabel.slice(1)}
+                                                        </span>
+                                                    );
+                                                })()}
+                                            </div>
+                                        </td>
+                                        <td className={`px-6 py-4 whitespace-nowrap ${theme === 'dark' ? 'text-gray-300' : 'text-gray-500'}`}>
+                                            {formatDuration(lesson.duration)}
+>>>>>>> 98414113c0390847a7de4771865d8ca8ddb08dac
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap">
                                             {getStatusBadge(lesson.status)}
                                         </td>
                                         <td className={`px-6 py-4 whitespace-nowrap ${theme === 'dark' ? 'text-gray-300' : 'text-gray-500'}`}>
+<<<<<<< HEAD
                                             {new Date(lesson.createdAt).toLocaleDateString()}
+=======
+                                            {formatDate(lesson.createdAt)}
+>>>>>>> 98414113c0390847a7de4771865d8ca8ddb08dac
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-right">
                                             <div className="flex justify-end space-x-2">
+                                                <Link href={`/dashboard/lecturer/lessons/${lesson.id}`}>
+                                                    <button
+                                                        className={`p-1 rounded-full ${theme === 'dark'
+                                                            ? 'hover:bg-gray-600 text-gray-300'
+                                                            : 'hover:bg-gray-100 text-gray-600'
+                                                            }`}
+                                                        title="Preview"
+                                                    >
+                                                        <ExternalLink size={18} />
+                                                    </button>
+                                                </Link>
+                                                <Link href={`/dashboard/lecturer/lessons/${lesson.id}/edit`}>
+                                                    <button
+                                                        className={`p-1 rounded-full ${theme === 'dark'
+                                                            ? 'hover:bg-gray-600 text-blue-400'
+                                                            : 'hover:bg-gray-100 text-teal-600'
+                                                            }`}
+                                                        title="Edit"
+                                                    >
+                                                        <Edit size={18} />
+                                                    </button>
+                                                </Link>
                                                 <button
+<<<<<<< HEAD
                                                     className={`p-1 rounded-full ${theme === 'dark'
                                                         ? 'hover:bg-gray-600 text-gray-300'
                                                         : 'hover:bg-gray-100 text-gray-600'
@@ -287,6 +440,8 @@ export default function LessonsPage() {
                                                     <Edit size={18} />
                                                 </button>
                                                 <button
+=======
+>>>>>>> 98414113c0390847a7de4771865d8ca8ddb08dac
                                                     onClick={() => handleDeleteLesson(lesson.id)}
                                                     className={`p-1 rounded-full ${theme === 'dark'
                                                         ? 'hover:bg-gray-600 text-red-400'

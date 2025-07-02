@@ -45,7 +45,13 @@ export default function LoginForm() {
       const userRole = session.user.role || 'student';
 
       // Redirect based on role
-      router.replace(userRole === "lecturer" ? "/dashboard/lecturer" : "/dashboard/student");
+      router.replace(
+        userRole === "lecturer"
+          ? "/dashboard/lecturer"
+          : userRole === "admin"
+            ? "/dashboard/admin"
+            : "/dashboard/student"
+      );
     } catch (error: any) {
       console.error("Login error:", error);
       setError(error.message || "Authentication failed. Please try again.");

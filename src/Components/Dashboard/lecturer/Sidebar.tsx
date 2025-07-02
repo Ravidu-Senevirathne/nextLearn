@@ -223,6 +223,8 @@ const Sidebar: React.FC<SidebarProps> = ({ sidebarOpen, toggleSidebar, theme }) 
                     )}
                 </div>
 
+              
+
                 <Link
                     href="/dashboard/lecturer/calendar"
                     className={getLinkClasses()}

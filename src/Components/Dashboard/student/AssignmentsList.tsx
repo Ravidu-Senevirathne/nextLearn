@@ -35,14 +35,14 @@ const AssignmentsList: React.FC<AssignmentsListProps> = ({ assignments }) => {
                                     </div>
                                 </div>
                                 <div className={`px-2 py-1 text-xs rounded-full ${assignment.status === 'pending'
-                                        ? 'bg-amber-900/40 text-amber-400'
-                                        : assignment.status === 'submitted'
-                                            ? 'bg-blue-900/40 text-blue-400'
-                                            : 'bg-green-900/40 text-green-400'
+                                    ? 'bg-amber-900/40 text-amber-400'
+                                    : assignment.status === 'submitted'
+                                        ? 'bg-blue-900/40 text-blue-400'
+                                        : 'bg-green-900/40 text-green-400'
                                     }`}>
                                     {assignment.status === 'pending' && 'Pending'}
                                     {assignment.status === 'submitted' && 'Submitted'}
-                                    {assignment.status === 'graded' && `Graded: ${assignment.grade}`}
+                                    {assignment.status === 'graded' && 'Graded'}
                                 </div>
                             </div>
                         </div>
