@@ -1,4 +1,4 @@
-<<<<<<< HEAD
+
 NextLearn LMS - Learning Management System
 NextLearn LMS is a powerful and intuitive Learning Management System (LMS) designed for seamless course creation, student enrollment, and performance tracking. Built with Next.js for the frontend and Laravel for the backend, this platform provides a responsive, user-friendly interface for both students and instructors. It leverages REST APIs for smooth communication between the frontend and backend.
 
